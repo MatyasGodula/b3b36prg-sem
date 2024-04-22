@@ -48,3 +48,5 @@ architecture
         | - pop events from queue
         | - write pipe
         | - refresh xwin
+
+event queue - module based global variable
