@@ -31,7 +31,10 @@ int main(int argc, char* argv[])
     thread_data[MAIN_THREAD] = &pipe_out;
 
     /*
-    finished at part 4 15:33
+
+    finished at part 4 => 15:33
+    https://cw.fel.cvut.cz/wiki/courses/b3b36prg/resources/prgsem
+
     */
 
     for (int i = 0; i < NUM_THREADS; ++i) {
