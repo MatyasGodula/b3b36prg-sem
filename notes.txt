@@ -1,0 +1,50 @@
+how to communicate via named pipes
+    b3b36prg-sem
+
+how ot create threads
+    b3b36prg-lec08-codes.zip
+
+hwo to handle keyboard
+    b3b36prg-lec08-codes.zip
+
+how to communicate between threads
+    event queue
+    main thread reads event queue
+    other threads will push events to the queue
+
+how to visualize 
+    b3b36prg-sem
+    xwin_sdl
+
+how to set up / configure parameters
+    by default use simpler values
+    vga 640x480, inspiration from binaries
+
+
+architecture
+    --main-- 
+        create threads
+    events:
+        * pipe_in - read messages from the computational module
+        * keyboard -- 
+        * main_logic -- 
+
+        * resources 
+        * keyboard (read) / stdin and a graphical window
+        * pipe (in read)
+        * pipe (out write)
+
+        threads:
+        * boss - main() - create and join all other threads
+        * keyboard (read keyboard) -  read nad send events to main()
+        | - read keyboard -- translate keybindings to events (to call actions via main)
+        | - push events to queue
+
+        * pipe_in (computational_module.out) send events to main()
+        | - read pipe
+        | - push events to queue
+        
+        * main (read events from other threads, pipe write computational_module.in, graphics window)
+        | - pop events from queue
+        | - write pipe
+        | - refresh xwin
