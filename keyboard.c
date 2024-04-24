@@ -24,8 +24,17 @@ void* keyboard_thread(void* data)
             case 'a': // cancels the current calculation process
                 ev.type = EV_ABORT;
                 break;
+            case 'l':
+                ev.type = EV_CLEAR_BUFFER;
+                break;
+            case 'r':
+                ev.type = EV_RESET_CHUNK;
+                break;
             default:
                 break;
+        } // end of switch
+        if (ev.type != EV_TYPE_NUM) {
+            queue_push(ev);
         }
     } // end of while loop
     set_quit();

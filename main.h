@@ -6,6 +6,6 @@
 #include <stdbool.h>
 
 void* main_thread(void*);
-
+//static void process_pipe_message(event* const ev);
 
 #endif

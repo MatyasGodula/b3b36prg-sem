@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 
     /*
 
-    finished at part 4 => 40:49
+    finished at part 5 => start
     https://cw.fel.cvut.cz/wiki/courses/b3b36prg/resources/prgsem
 
     */
@@ -80,7 +80,7 @@ void* read_pipe_thread(void* data)
 				if (get_message_size(c, &len)) {
 					msg_buffer[index++] = c;
 				} else {
-					fprintf(stderr, "unknown message type detected 0x%x\n", c);
+					fprintf(stderr, "Unknown message type detected 0x%x\n", c);
 				}
 			} else { // read remaining bytes of message
 				msg_buffer[index++] = c;
@@ -92,15 +92,17 @@ void* read_pipe_thread(void* data)
 					ev.data.msg = msg;
 					queue_push(ev);
 				} else {
-					fprintf(stderr, "Error: Cannot parse message type 0x%x\n", msg_buffer[0]);
+					fprintf(stderr, "Error: Cannot parse message type %d\n", msg_buffer[0]);
+					free(msg);
 				}
+				index = len = 0;
 			}
 		} else if (ret == 0) { // timeout happened
 
 		} else { // error occurred
 			fprintf(stderr, "Error: problem reading from a file\n");
 			set_quit();
-			event ev = { .type = EV_QUIT };
+			//event ev = { .type = EV_QUIT }; // deactivated for now
 		}
 		end = is_quit();
 	} // end of while cycle
