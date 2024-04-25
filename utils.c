@@ -46,3 +46,8 @@ void error(const char *str)
 {
     fprintf(stderr, "ERROR: %s\n", str);
 }
+
+void warning(const char* str) 
+{
+    fprintf(stderr, "WARNING: %s\n", str);
+}

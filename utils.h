@@ -21,5 +21,6 @@ void call_termios(int reset);
 void info(const char *str);
 void debug(const char *str);
 void error(const char *str);
+void warning(const char* str);
 
 #endif

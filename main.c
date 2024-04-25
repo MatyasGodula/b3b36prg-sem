@@ -7,6 +7,7 @@
 #include "event_queue.h"
 #include "utils.h"
 #include "messages.h"
+#include "computation.h"
 
 static void process_pipe_message(event* const ev);
 
@@ -19,6 +20,7 @@ void* main_thread(void* data)
     int msg_len;
     bool quit = false;
 
+    computation_init();
     // initialize computation & visualization
     do {
         event ev = queue_pop();
@@ -31,10 +33,10 @@ void* main_thread(void* data)
                 msg.type = MSG_GET_VERSION;
                 break;
             case EV_SET_COMPUTE:
-                // TODO
+                info(set_compute(&msg) ? "set_compute success" : "set_compute fail");
                 break;
             case EV_COMPUTE:
-                // TODO
+                info(compute(&msg) ? "compute success" : "compute fail");
                 break;
             case EV_ABORT:
                 // TODO
@@ -55,6 +57,7 @@ void* main_thread(void* data)
         }
         quit = is_quit();
     } while (!quit);
+    computation_cleanup();
 
     // cleanup computation, visualization
     return NULL;
@@ -71,6 +74,19 @@ void process_pipe_message(event* const ev)
             break;
         case MSG_VERSION:
             fprintf(stderr, "INFO: Module version %d.%d-p%d\n", msg->data.version.major, msg->data.version.minor, msg->data.version.patch);
+            break;
+        case MSG_COMPUTE_DATA:
+            update_data(&(msg->data.compute_data));
+            break;
+        case MSG_DONE:
+            gui_refresh();
+            if (is_done()) {
+                info("Computation done");
+            } else {
+                event ev = { .type = EV_COMPUTE };
+                queue_push(ev);
+            }
+            info("msg_done");
             break;
         default:
             fprintf(stderr, "Unhandled pipe message type %d\n", msg->type);

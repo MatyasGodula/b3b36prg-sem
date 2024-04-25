@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 
     /*
 
-    finished at part 5 => start
+    finished at part 5 => 35:47
     https://cw.fel.cvut.cz/wiki/courses/b3b36prg/resources/prgsem
 
     */
