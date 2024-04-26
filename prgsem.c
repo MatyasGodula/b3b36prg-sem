@@ -15,6 +15,13 @@
 
 void* read_pipe_thread(void*); 
 
+/*
+handles inputs from the gui through the pipe_in pipe which it itself also sets up,
+it interprets the messages coming from the gui using read_pipe_thread, when a message
+is read it adds an event into the queue. it also connects main to the threads so 
+they finish together
+*/
+
 int main(int argc, char* argv[]) 
 {
     int ret = EXIT_SUCCESS;
@@ -102,7 +109,11 @@ void* read_pipe_thread(void* data)
 		} else { // error occurred
 			fprintf(stderr, "Error: problem reading from a file\n");
 			set_quit();
-			//event ev = { .type = EV_QUIT }; // deactivated for now
+			event ev = { .type = EV_QUIT }; // deactivated for now
+			/*
+			 * added queue_push to push the quit into the queue 
+			 */
+			//queue_push(ev);
 		}
 		end = is_quit();
 	} // end of while cycle

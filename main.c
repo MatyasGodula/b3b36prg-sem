@@ -11,9 +11,21 @@
 
 static void process_pipe_message(event* const ev);
 
+/*
+main thread pops an event from a queue, depending on the type of the event it 
+manages the operations both the ones which were inputted by the user through
+the gui and the terminal, if a message was sent from the gui the ev type is:
+MESSAGE_IN_PIPE, therefore it knows to look in there for the data
+
+so in summary keyboard_thread, main_thread and read_pipe_thread communicate
+between each other using the queue since they share memory, and gui communicates 
+using pipes 
+*/
+
 void* main_thread(void* data) 
 {
     my_assert(data != NULL, __func__, __LINE__, __FILE__);
+    // main.c uses pipe_out to write into so it has the write end
     int pipe_out = *(int*)data;
     message msg;
     uint8_t msg_buffer[sizeof(message)];
@@ -49,6 +61,7 @@ void* main_thread(void* data)
         } // switch end
         if (msg.type != MSG_NBR) {
             my_assert(fill_message_buf(&msg, msg_buffer, sizeof(message), &msg_len), __func__, __LINE__, __FILE__);
+            // writes information back into the pipe_out
             if (write(pipe_out, msg_buffer, msg_len) == msg_len) {
                 debug("send data to pipe out");
             } else {

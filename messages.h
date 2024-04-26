@@ -75,7 +75,7 @@ typedef struct {
 // return the size of the message in bytes
 bool get_message_size(uint8_t msg_type, int *size);
 
-// fill the given buf by the message msg (marhaling);
+// fill the given buf by the message msg (marshaling);
 bool fill_message_buf(const message *msg, uint8_t *buf, int size, int *len);
 
 // parse the message from buf to msg (unmarshaling)
