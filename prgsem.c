@@ -113,7 +113,7 @@ void* read_pipe_thread(void* data)
 			/*
 			 * added queue_push to push the quit into the queue 
 			 */
-			//queue_push(ev);
+			queue_push(ev);
 		}
 		end = is_quit();
 	} // end of while cycle

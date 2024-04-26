@@ -1,6 +1,6 @@
 #include <stdbool.h>
-#include <pthread.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #include "event_queue.h"
 
@@ -77,8 +77,6 @@ void queue_push(event ev)
     q.queue[q.in] = ev;
     q.in = (q.in + 1) % QUEUE_CAPACITY;
     pthread_cond_broadcast(&(q.cond));
-    pthread_mutex_unlock(&(q.mtx));
-
     pthread_mutex_unlock(&(q.mtx));
 }
 

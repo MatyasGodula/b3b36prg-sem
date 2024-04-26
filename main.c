@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "messages.h"
 #include "computation.h"
+#include "gui.h"
 
 static void process_pipe_message(event* const ev);
 
@@ -33,6 +34,7 @@ void* main_thread(void* data)
     bool quit = false;
 
     computation_init();
+    gui_init();
     // initialize computation & visualization
     do {
         event ev = queue_pop();
@@ -70,6 +72,7 @@ void* main_thread(void* data)
         }
         quit = is_quit();
     } while (!quit);
+    gui_cleanup();
     computation_cleanup();
 
     // cleanup computation, visualization
@@ -99,7 +102,6 @@ void process_pipe_message(event* const ev)
                 event ev = { .type = EV_COMPUTE };
                 queue_push(ev);
             }
-            info("msg_done");
             break;
         default:
             fprintf(stderr, "Unhandled pipe message type %d\n", msg->type);

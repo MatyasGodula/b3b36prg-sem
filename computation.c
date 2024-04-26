@@ -1,5 +1,9 @@
 #include "computation.h"
 
+#define R_CALC(t) (9 * (1 - t) * t*t*t * 255)
+#define G_CALC(t) (15 * (1 - t)*(1 - t) * t*t * 255)
+#define B_CALC(t) (8.5 * (1 - t)*(1 - t)*(1 - t) * t * 255)
+
 static struct {
     double c_re;
     double c_im;
@@ -96,13 +100,26 @@ bool set_compute(message* msg)
 bool compute(message* msg)
 {
     my_assert(msg != NULL, __func__, __LINE__, __FILE__);
-    if (!is_computing()) {
+    if (!is_computing()) { // first chunk
         comp.cid = 0;
         comp.computing = true;
         comp.cur_x = comp.cur_y = 0; // start computation of the whole image
         comp.chunk_re = comp.range_re_min; // upper-"left" corner of the image
         comp.chunk_im = comp.range_im_max; // "upper"-left corner of the image
         msg->type = MSG_COMPUTE;
+    } else { // next chunk
+        comp.cid += 1;
+        if (comp.cid < comp.nbr_chunks) {
+            comp.cur_x += comp.chunk_n_re;
+            comp.chunk_re += comp.chunk_n_re * comp.d_re;
+            if (comp.cur_x >= comp.grid_w) {
+                comp.chunk_re = comp.range_re_min;
+                comp.chunk_im = comp.chunk_n_im * comp.d_im;
+                comp.cur_x = 0;
+                comp.cur_y = comp.chunk_n_im;
+            }
+            msg->type = MSG_COMPUTE;
+        } 
     }
 
     if (is_computing() && msg->type == MSG_COMPUTE) {
@@ -123,7 +140,35 @@ void update_data(const msg_compute_data* compute_data)
         if (idx >= 0 && idx < (comp.grid_w * comp.grid_h)) {
             comp.grid[idx] = compute_data->iter;
         }
+        if ((comp.cid + 1) >= comp.nbr_chunks && (compute_data->i_re + 1) == comp.chunk_n_re && (compute_data->i_im + 1) == comp.chunk_n_im) {
+            comp.done = true;
+            comp.computing = false;
+        }
     } else {
         warning("Received chunk with unexpected chunk id");
     }
 }
+
+void get_grid_size(int *w, int *h)
+{
+    *w = comp.grid_w;
+    *h = comp.grid_h;    
+}
+
+void update_image(int w, int h, unsigned char* img)
+{
+    my_assert(img && comp.grid && w == comp.grid_w && h == comp.grid_h
+              , __func__, __LINE__, __FILE__);
+    for (int i = 0; i < w * h; ++i) {
+        const double t = 1. * comp.grid[i] / (comp.n + 1.0);
+        /**(img++) = R_CALC(t);
+        *(img++) = G_CALC(t);
+        *(img++) = B_CALC(t);*/
+
+        *(img++) = (9 * (1 - t) * t*t*t * 255);
+        *(img++) = (15 * (1 - t)*(1 - t) * t*t * 255);
+        *(img++) = (8.5 * (1 - t)*(1 - t)*(1 - t) * t * 255);
+
+    }
+}
+

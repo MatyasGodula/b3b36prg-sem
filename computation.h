@@ -19,7 +19,10 @@ void abort_comp(void);
 
 bool set_compute(message* msg);
 bool compute(message* msg);
+void update_image(int w, int h, unsigned char* img);
 
 void update_data(const msg_compute_data* compute_data);
+
+void get_grid_size(int *w, int *h);
 
 #endif
