@@ -50,8 +50,7 @@ static unsigned char icon_32x32_bits[] = {
 
 int xwin_init(int w, int h)
 {
-   int r;
-   r = SDL_Init(SDL_INIT_VIDEO);
+   int r = SDL_Init(SDL_INIT_VIDEO);
    my_assert(win == NULL, __func__, __LINE__, __FILE__);
    win = SDL_CreateWindow("PRG Semester Project", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN);
    my_assert(win != NULL, __func__, __LINE__, __FILE__);

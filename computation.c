@@ -1,4 +1,5 @@
 #include "computation.h"
+#include "utils.h"
 
 #define R_CALC(t) (9 * (1 - t) * t*t*t * 255)
 #define G_CALC(t) (15 * (1 - t)*(1 - t) * t*t * 255)
@@ -109,6 +110,7 @@ bool compute(message* msg)
         msg->type = MSG_COMPUTE;
     } else { // next chunk
         comp.cid += 1;
+        printf("currently computing chunk :%d\n", comp.cid);
         if (comp.cid < comp.nbr_chunks) {
             comp.cur_x += comp.chunk_n_re;
             comp.chunk_re += comp.chunk_n_re * comp.d_re;
@@ -157,18 +159,17 @@ void get_grid_size(int *w, int *h)
 
 void update_image(int w, int h, unsigned char* img)
 {
-    my_assert(img && comp.grid && w == comp.grid_w && h == comp.grid_h
-              , __func__, __LINE__, __FILE__);
+    my_assert(img && comp.grid && w == comp.grid_w && h == comp.grid_h, __func__, __LINE__, __FILE__);
     for (int i = 0; i < w * h; ++i) {
         const double t = 1. * comp.grid[i] / (comp.n + 1.0);
         /**(img++) = R_CALC(t);
         *(img++) = G_CALC(t);
         *(img++) = B_CALC(t);*/
+       // smthn
 
-        *(img++) = (9 * (1 - t) * t*t*t * 255);
-        *(img++) = (15 * (1 - t)*(1 - t) * t*t * 255);
-        *(img++) = (8.5 * (1 - t)*(1 - t)*(1 - t) * t * 255);
-
+        *(img++) = (9 * (1-t) * t*t*t * 255);
+        *(img++) = (15 * (1-t)*(1-t) * t*t * 255);
+        *(img++) = (8.5 * (1-t)*(1-t)*(1-t) * t * 255);
     }
 }
 

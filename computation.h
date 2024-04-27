@@ -3,7 +3,6 @@
 #include <stdlib.h>
 
 #include "messages.h"
-#include "utils.h"
 
 #ifndef __COMPUTATION_H_
 #define __COMPUTATION_H__

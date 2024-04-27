@@ -13,14 +13,7 @@
 static void process_pipe_message(event* const ev);
 
 /*
-main thread pops an event from a queue, depending on the type of the event it 
-manages the operations both the ones which were inputted by the user through
-the gui and the terminal, if a message was sent from the gui the ev type is:
-MESSAGE_IN_PIPE, therefore it knows to look in there for the data
 
-so in summary keyboard_thread, main_thread and read_pipe_thread communicate
-between each other using the queue since they share memory, and gui communicates 
-using pipes 
 */
 
 void* main_thread(void* data) 

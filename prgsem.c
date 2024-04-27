@@ -8,6 +8,7 @@
 #include "event_queue.h"
 #include "utils.h"
 #include "prg_io_nonblock.h"
+#include "gui.h"
 
 #ifndef IO_READ_TIMEOUT_MS
 #define IO_READ_TIMEOUT_MS 100
@@ -16,10 +17,7 @@
 void* read_pipe_thread(void*); 
 
 /*
-handles inputs from the gui through the pipe_in pipe which it itself also sets up,
-it interprets the messages coming from the gui using read_pipe_thread, when a message
-is read it adds an event into the queue. it also connects main to the threads so 
-they finish together
+
 */
 
 int main(int argc, char* argv[]) 
@@ -34,10 +32,10 @@ int main(int argc, char* argv[])
 	printf("finished opening\n");
     my_assert(pipe_in != -1 && pipe_out != -1, __func__, __LINE__, __FILE__);
 
-    enum {KEYBOARD_THREAD, READ_PIPE_THREAD, MAIN_THREAD, NUM_THREADS};
-    const char* thread_names[] = {"Keyboard", "ReadPipe", "Main"};
+    enum {KEYBOARD_THREAD, READ_PIPE_THREAD, MAIN_THREAD, WIN_THREAD, NUM_THREADS};
+    const char* thread_names[] = {"Keyboard", "ReadPipe", "Main", "GuiWin"};
     pthread_t threads[NUM_THREADS];
-    void* (*thread_functions[])(void*) = {keyboard_thread, read_pipe_thread, main_thread};
+    void* (*thread_functions[])(void*) = {keyboard_thread, read_pipe_thread, main_thread, gui_win_thread};
     void* thread_data[NUM_THREADS] = {};
     thread_data[READ_PIPE_THREAD] = &pipe_in;
     thread_data[MAIN_THREAD] = &pipe_out;
@@ -73,8 +71,8 @@ void* read_pipe_thread(void* data)
 	int pipe_in = *(int*)data;
 	fprintf(stderr, "read_pipe thread started\n");
 	bool end = false;
-	uint8_t msg_buffer[sizeof(message)];
-	int index = 0;
+	uint8_t msg_buf[sizeof(message)];
+	int i = 0;
 	int len = 0;
 
 	unsigned char c;
@@ -83,37 +81,37 @@ void* read_pipe_thread(void* data)
 	while (!end) {
 		int ret = io_getc_timeout(pipe_in, IO_READ_TIMEOUT_MS, &c);
 		if (ret > 0) { // char has been read
-			if (index == 0) {
+			if (i == 0) {
 				if (get_message_size(c, &len)) {
-					msg_buffer[index++] = c;
+					msg_buf[i++] = c;
 				} else {
 					fprintf(stderr, "Unknown message type detected 0x%x\n", c);
 				}
 			} else { // read remaining bytes of message
-				msg_buffer[index++] = c;
+				msg_buf[i++] = c;
 			}
-			if (len  > 0 && index == len) {
+			if (len  > 0 && i == len) {
 				message* msg = my_alloc(sizeof(message));
-				if (parse_message_buf(msg_buffer, len, msg)) {
+				if (parse_message_buf(msg_buf, len, msg)) {
 					event ev = { .type = EV_PIPE_IN_MESSAGE };
 					ev.data.msg = msg;
 					queue_push(ev);
 				} else {
-					fprintf(stderr, "Error: Cannot parse message type %d\n", msg_buffer[0]);
+					fprintf(stderr, "Error: Cannot parse message type %d\n", msg_buf[0]);
 					free(msg);
 				}
-				index = len = 0;
+				i = len = 0;
 			}
 		} else if (ret == 0) { // timeout happened
 
 		} else { // error occurred
 			fprintf(stderr, "Error: problem reading from a file\n");
 			set_quit();
-			event ev = { .type = EV_QUIT }; // deactivated for now
+			//event ev = { .type = EV_QUIT }; // deactivated for now
 			/*
 			 * added queue_push to push the quit into the queue 
 			 */
-			queue_push(ev);
+			//queue_push(ev);
 		}
 		end = is_quit();
 	} // end of while cycle
