@@ -72,6 +72,10 @@ void xwin_redraw(int w, int h, unsigned char *img)
 {
    my_assert(img && win, __func__, __LINE__, __FILE__);
    SDL_Surface *scr = SDL_GetWindowSurface(win);
+   if (scr == NULL) {
+      fprintf(stderr, "Failed to get window surface: %s\n", SDL_GetError());
+      return;
+   }
    for(int y = 0; y < scr->h; ++y) {
       for(int x = 0; x < scr->w; ++x) {
          const int idx = (y * scr->w + x) * scr->format->BytesPerPixel;
@@ -81,6 +85,7 @@ void xwin_redraw(int w, int h, unsigned char *img)
          *(px + scr->format->Bshift / 8) = *(img++);
       }
    }
+   debug("window successfully redrawn");
    SDL_UpdateWindowSurface(win);
 }
 

@@ -35,6 +35,7 @@ void* main_thread(void* data)
         switch (ev.type) {
             case EV_QUIT:
                 debug("Quit received");
+                set_quit();
                 break;
             case EV_GET_VERSION:
                 msg.type = MSG_GET_VERSION;

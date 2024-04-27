@@ -64,7 +64,7 @@ void computation_init(void)
 {
     comp.grid = my_alloc(comp.grid_w * comp.grid_h);
     comp.d_re = (comp.range_re_max - comp.range_re_min) / (1. * comp.grid_w);
-    comp.d_re = -(comp.range_im_max - comp.range_im_min) / (1. * comp.grid_h);
+    comp.d_im = -(comp.range_im_max - comp.range_im_min) / (1. * comp.grid_h); // also a mistake in this line
     comp.nbr_chunks = (comp.grid_w * comp.grid_h) / (comp.chunk_n_re * comp.chunk_n_im);
 }
 
@@ -110,24 +110,25 @@ bool compute(message* msg)
         msg->type = MSG_COMPUTE;
     } else { // next chunk
         comp.cid += 1;
-        printf("currently computing chunk :%d\n", comp.cid);
         if (comp.cid < comp.nbr_chunks) {
             comp.cur_x += comp.chunk_n_re;
             comp.chunk_re += comp.chunk_n_re * comp.d_re;
             if (comp.cur_x >= comp.grid_w) {
-                comp.chunk_re = comp.range_re_min;
-                comp.chunk_im = comp.chunk_n_im * comp.d_im;
                 comp.cur_x = 0;
-                comp.cur_y = comp.chunk_n_im;
+                comp.chunk_re = comp.range_re_min;
+                comp.cur_y += comp.chunk_n_im;
+                comp.chunk_im += comp.chunk_n_im * comp.d_im; // mistake on this line
             }
             msg->type = MSG_COMPUTE;
-        } 
+        } else { // all has been computed
+        }
     }
+    printf("computing chunk: %d\n", comp.cid);
 
-    if (is_computing() && msg->type == MSG_COMPUTE) {
+    if (comp.computing && msg->type == MSG_COMPUTE) {
         msg->data.compute.cid = comp.cid;
         msg->data.compute.re = comp.chunk_re;
-        msg->data.compute.im = comp.chunk_re;
+        msg->data.compute.im = comp.chunk_im; // the mistake was here probably
         msg->data.compute.n_re = comp.chunk_n_re;
         msg->data.compute.n_im = comp.chunk_n_im;
     }
@@ -138,7 +139,7 @@ void update_data(const msg_compute_data* compute_data)
 {
     my_assert(compute_data != NULL, __func__, __LINE__, __FILE__);
     if (compute_data->cid == comp.cid) {
-        const int idx = (comp.cur_x + compute_data->i_re + (comp.cur_y + compute_data->i_im) * comp.grid_w);
+        const int idx = comp.cur_x + compute_data->i_re + (comp.cur_y + compute_data->i_im) * comp.grid_w;
         if (idx >= 0 && idx < (comp.grid_w * comp.grid_h)) {
             comp.grid[idx] = compute_data->iter;
         }
@@ -162,14 +163,15 @@ void update_image(int w, int h, unsigned char* img)
     my_assert(img && comp.grid && w == comp.grid_w && h == comp.grid_h, __func__, __LINE__, __FILE__);
     for (int i = 0; i < w * h; ++i) {
         const double t = 1. * comp.grid[i] / (comp.n + 1.0);
-        /**(img++) = R_CALC(t);
+        *(img++) = R_CALC(t);
         *(img++) = G_CALC(t);
-        *(img++) = B_CALC(t);*/
-       // smthn
+        *(img++) = B_CALC(t);
 
-        *(img++) = (9 * (1-t) * t*t*t * 255);
-        *(img++) = (15 * (1-t)*(1-t) * t*t * 255);
-        *(img++) = (8.5 * (1-t)*(1-t)*(1-t) * t * 255);
+        //*(img++) = (9 * (1-t) * t*t*t * 255);
+        //*(img++) = (15 * (1-t)*(1-t) * t*t * 255);
+        //*(img++) = (8.5 * (1-t)*(1-t)*(1-t) * t * 255);
     }
+    info("image is being updated");
+    // note: works as intended the problem is not in this function
 }
 

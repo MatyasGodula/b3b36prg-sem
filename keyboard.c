@@ -2,13 +2,15 @@
 #include "event_queue.h"
 #include "utils.h"
 
+#include <sys/select.h>
+
 void* keyboard_thread(void* data)
 {
     fprintf(stderr, "Keyboard thread started\n");
     call_termios(0);
     int c;
     event ev;
-    while ((c = getchar()) != 'q') {
+    while (!is_quit() && (c = getchar()) != 'q') {
         ev.type = EV_TYPE_NUM;
         printf("character: %c\n", c);
         switch(c) {

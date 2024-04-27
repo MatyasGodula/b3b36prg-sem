@@ -1,4 +1,6 @@
 #include <SDL.h>
+#include <stdio.h>
+#include <stdbool.h>
 
 #include "gui.h"
 #include "xwin_sdl.h"
@@ -7,7 +9,7 @@
 #include "event_queue.h"
 
 #ifndef SDL_EVENT_POLL_WAIT_MS
-#define SDL_EVENT_POLL_WAIT_MS 100
+#define SDL_EVENT_POLL_WAIT_MS 10
 #endif
 
 static struct {
@@ -40,6 +42,8 @@ void gui_refresh(void)
     if (gui.img) {
         update_image(gui.w, gui.h, gui.img);
         xwin_redraw(gui.w, gui.h, gui.img);
+    } else {
+        info("image not yet initialized");
     }
 }
 
@@ -47,12 +51,38 @@ void* gui_win_thread(void* d)
 {
     info("GuiWin thread started");
     bool quit = false;
-    SDL_Event event;
+    SDL_Event sdl_event;
+    event ev;
     while (!quit) {
-        if (SDL_PollEvent(&event)) {
-            if (event.type == SDL_KEYDOWN) {
-                info("keydown");
-            } else if (event.type == SDL_KEYUP) {
+        if (SDL_PollEvent(&sdl_event)) {
+            if (sdl_event.type == SDL_KEYDOWN) {
+                switch(sdl_event.key.keysym.sym) {
+                    case SDLK_q:
+                        ev.type = EV_QUIT; 
+                        queue_push(ev);// quits the app 
+                        info("quit");
+                        break;
+                    case SDLK_s:
+                        info("s received");
+                        ev.type = EV_SET_COMPUTE;
+                        break;
+                    case SDLK_c:
+                        info("c received");
+                        ev.type = EV_COMPUTE;
+                        break;
+                    case SDLK_a:
+                        info("a received");
+                        ev.type = EV_ABORT;
+                        break;
+                    case SDLK_g:
+                        info("g received");
+                        ev.type = EV_GET_VERSION;
+                        break;
+                    default:
+                        break;
+                }
+                
+            } else if (sdl_event.type == SDL_KEYUP) {
                 info("keyup");
             } else {
                 //debug("SDL_PollEvent initialized");

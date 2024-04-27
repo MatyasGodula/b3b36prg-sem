@@ -1,3 +1,4 @@
+CC:=ccache $(CC)
 CFLAGS+= -Wall -Werror -std=gnu99 -g
 LDFLAGS=-lpthread
 

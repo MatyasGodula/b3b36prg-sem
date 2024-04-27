@@ -23,6 +23,7 @@ void* read_pipe_thread(void*);
 int main(int argc, char* argv[]) 
 {
     int ret = EXIT_SUCCESS;
+	// changed these two lines
     const char* fname_pipe_in = argc > 1 ? argv[1] : "/tmp/computational_module.out";
     const char* fname_pipe_out = argc > 2 ? argv[2] : "/tmp/computational_module.in";
 
@@ -47,17 +48,17 @@ int main(int argc, char* argv[])
 
     */
 
-    for (int i = 0; i < NUM_THREADS; ++i) {
-      int r = pthread_create(&threads[i], NULL, thread_functions[i], thread_data[i]);
-      printf("Create thread '%s' %s\r\n", thread_names[i], ( r == 0 ? "OK" : "FAIL") );
-    }
+	for (int i = 0; i < NUM_THREADS; ++i) {
+		int r = pthread_create(&threads[i], NULL, thread_functions[i], thread_data[i]);
+		printf("Create thread '%s' %s\r\n", thread_names[i], ( r == 0 ? "OK" : "FAIL") );
+	}
 
-    int *ex;
-    for (int i = 0; i < NUM_THREADS; ++i) {
-      printf("Call join to the thread %s\r\n", thread_names[i]);
-      int r = pthread_join(threads[i], (void*)&ex);
-      printf("Joining the thread %s has been %s\r\n", thread_names[i], (r == 0 ? "OK" : "FAIL"));
-    }
+	int *ex;
+	for (int i = 0; i < NUM_THREADS; ++i) {
+		printf("Call join to the thread %s\r\n", thread_names[i]);
+		int r = pthread_join(threads[i], (void*)&ex);
+		printf("Joining the thread %s has been %s\r\n", thread_names[i], (r == 0 ? "OK" : "FAIL"));
+	}
 
     io_close(pipe_in);
     io_close(pipe_out);
@@ -107,11 +108,11 @@ void* read_pipe_thread(void* data)
 		} else { // error occurred
 			fprintf(stderr, "Error: problem reading from a file\n");
 			set_quit();
-			//event ev = { .type = EV_QUIT }; // deactivated for now
+			event ev = { .type = EV_QUIT }; // deactivated for now
 			/*
 			 * added queue_push to push the quit into the queue 
 			 */
-			//queue_push(ev);
+			queue_push(ev);
 		}
 		end = is_quit();
 	} // end of while cycle
