@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "xwin_sdl.h": "c",
-        "computation.h": "c"
+        "computation.h": "c",
+        "stdbool.h": "c"
     }
 }

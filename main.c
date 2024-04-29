@@ -13,7 +13,7 @@
 static void process_pipe_message(event* const ev);
 
 /*
-
+manages different actions that are supposed to happen in the app, evaluates 
 */
 
 void* main_thread(void* data) 

@@ -17,7 +17,8 @@
 void* read_pipe_thread(void*); 
 
 /*
-
+takes information from the comp module and interprets it, also opens pipes for reading and writing and also starts 
+different threads that each do something else
 */
 
 int main(int argc, char* argv[]) 
@@ -43,8 +44,7 @@ int main(int argc, char* argv[])
 
     /*
 
-    finished at part 5 => 35:47
-    https://cw.fel.cvut.cz/wiki/courses/b3b36prg/resources/prgsem
+    plan: make the comp_module so i can use it in this program
 
     */
 
