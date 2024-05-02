@@ -47,7 +47,7 @@ void* main_thread(void* data)
                 info(compute(&msg) ? "compute success" : "compute fail");
                 break;
             case EV_ABORT:
-                // TODO
+                msg.type = MSG_ABORT;
                 break;
             case EV_PIPE_IN_MESSAGE:
                 process_pipe_message(&ev);

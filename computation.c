@@ -172,6 +172,5 @@ void update_image(int w, int h, unsigned char* img)
         //*(img++) = (8.5 * (1-t)*(1-t)*(1-t) * t * 255);
     }
     info("image is being updated");
-    // note: works as intended the problem is not in this function
 }
 
