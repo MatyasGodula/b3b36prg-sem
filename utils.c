@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "messages.h"
 
 void my_assert(bool r, const char *func_name, int line, const char *file_name)
 {
@@ -50,4 +51,45 @@ void error(const char *str)
 void warning(const char* str) 
 {
     fprintf(stderr, "WARNING: %s\n", str);
+}
+
+// just for the case of readability
+void pipe_message_report(int msg_name)
+{
+    printf("ERROR: unhandled message type ");
+    switch(msg_name) {
+        case MSG_OK:
+            printf("MSG_OK\n");
+            break;
+        case MSG_ERROR:
+            printf("MSG_ERROR\n");
+            break;
+        case MSG_STARTUP:
+            printf("MSG_STARTUP\n");
+            break;
+        case MSG_COMPUTE:
+            printf("MSG_COMPUTE\n");
+            break;
+        case MSG_DONE:
+            printf("MSG_DONE\n");
+            break;
+        case MSG_COMPUTE_DATA:
+            printf("MSG_COMPUTE_DATA\n");
+            break;
+        case MSG_VERSION:
+            printf("MSG_VERSION\n");
+            break;
+        case MSG_ABORT:
+            printf("MSG_ABORT\n");
+            break;
+        case MSG_SET_COMPUTE:
+            printf("MSG_SET_COMPUTE\n");
+            break;
+        case MSG_NBR:
+            printf("MSG_NBR\n");
+            break;
+        default:
+            printf("otherwise unknown message\n");
+            break;
+    }
 }

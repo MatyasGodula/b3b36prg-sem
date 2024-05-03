@@ -48,6 +48,7 @@ void* main_thread(void* data)
                 break;
             case EV_ABORT:
                 msg.type = MSG_ABORT;
+                abort_comp();
                 break;
             case EV_PIPE_IN_MESSAGE:
                 process_pipe_message(&ev);
@@ -92,10 +93,13 @@ void process_pipe_message(event* const ev)
             gui_refresh();
             if (is_done()) {
                 info("Computation done");
-            } else {
+            } else if (is_computing()) {
                 event ev = { .type = EV_COMPUTE };
                 queue_push(ev);
-            }
+            } else {}
+            break;
+        case MSG_ABORT:
+            info("computation successfully aborted by the comp_module");
             break;
         default:
             fprintf(stderr, "Unhandled pipe message type %d\n", msg->type);
