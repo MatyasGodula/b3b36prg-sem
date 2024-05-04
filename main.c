@@ -9,6 +9,7 @@
 #include "messages.h"
 #include "computation.h"
 #include "gui.h"
+#include "xwin_sdl.h"
 
 static void process_pipe_message(event* const ev);
 
@@ -53,6 +54,12 @@ void* main_thread(void* data)
             case EV_PIPE_IN_MESSAGE:
                 process_pipe_message(&ev);
                 break;
+            case EV_SAVE_IMAGE:
+                save_surface_to_image("output.png");
+                break;
+            case EV_REFRESH:
+                gui_refresh();
+                break;
             default:
                 break;
         } // switch end
@@ -69,6 +76,7 @@ void* main_thread(void* data)
     } while (!quit);
     gui_cleanup();
     computation_cleanup();
+    queue_cleanup();
 
     // cleanup computation, visualization
     return NULL;

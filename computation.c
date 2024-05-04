@@ -40,7 +40,7 @@ static struct {
     .c_re = -0.4,
     .c_im = 0.6,
 
-    .n = 60,
+    .n = 100,
 
     .range_re_min = -1.6,
     .range_re_max = 1.6,

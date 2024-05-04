@@ -42,12 +42,6 @@ int main(int argc, char* argv[])
     thread_data[READ_PIPE_THREAD] = &pipe_in;
     thread_data[MAIN_THREAD] = &pipe_out;
 
-    /*
-
-    plan: make the comp_module so i can use it in this program
-
-    */
-
 	for (int i = 0; i < NUM_THREADS; ++i) {
 		int r = pthread_create(&threads[i], NULL, thread_functions[i], thread_data[i]);
 		printf("Create thread '%s' %s\r\n", thread_names[i], ( r == 0 ? "OK" : "FAIL") );

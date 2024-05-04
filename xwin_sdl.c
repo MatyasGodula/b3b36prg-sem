@@ -68,6 +68,22 @@ void xwin_close()
    SDL_Quit();
 }
 
+int save_surface_to_image(const char *filename) 
+{
+	if (win == NULL) {
+		error("Window not yet initalized cannot save");
+	}
+	
+    SDL_Surface *surface = SDL_GetWindowSurface(win);
+    my_assert(surface != NULL && filename != NULL, __func__, __LINE__, __FILE__);
+    
+    if (IMG_SavePNG(surface, filename) != 0) {
+        error("Unable to save the image");
+        return -1;
+    }
+    return 0;
+}
+
 void xwin_redraw(int w, int h, unsigned char *img)
 {
    my_assert(img && win, __func__, __LINE__, __FILE__);

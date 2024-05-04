@@ -28,7 +28,8 @@ typedef enum {
    EV_CLEAR_BUFFER,
    EV_REFRESH,
    EV_PIPE_IN_MESSAGE,
-   EV_TYPE_NUM
+   EV_TYPE_NUM,
+   EV_SAVE_IMAGE
 } event_type;
 
 typedef struct {

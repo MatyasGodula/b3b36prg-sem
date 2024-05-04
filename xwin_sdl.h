@@ -12,6 +12,8 @@ void xwin_close();
 void xwin_redraw(int w, int h, unsigned char *img);
 void xwin_poll_events(void);
 
+int save_surface_to_image(const char *filename);
+
 #endif
 
 /* end of xwin_sdl.h */
