@@ -40,7 +40,7 @@ static struct {
     .c_re = -0.4,
     .c_im = 0.6,
 
-    .n = 100,
+    .n = 60,
 
     .range_re_min = -1.6,
     .range_re_max = 1.6,
@@ -66,6 +66,17 @@ void computation_init(void)
     comp.d_re = (comp.range_re_max - comp.range_re_min) / (1. * comp.grid_w);
     comp.d_im = -(comp.range_im_max - comp.range_im_min) / (1. * comp.grid_h); // also a mistake in this line
     comp.nbr_chunks = (comp.grid_w * comp.grid_h) / (comp.chunk_n_re * comp.chunk_n_im);
+}
+
+void clean_grid(void)
+{
+    if (!comp.grid) {
+        error("attempted grid cleanup when grid was not initialized yet");
+        return;
+    }
+    for (int i = 0; i < comp.grid_w * comp.grid_h; ++i) {
+        comp.grid[i] = 0;
+    }
 }
 
 void computation_cleanup(void)

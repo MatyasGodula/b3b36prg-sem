@@ -57,6 +57,10 @@ void* main_thread(void* data)
             case EV_SAVE_IMAGE:
                 save_surface_to_image("output.png");
                 break;
+            case EV_ERASE_IMAGE:
+                clean_image();
+                gui_refresh();
+                break;
             case EV_REFRESH:
                 gui_refresh();
                 break;

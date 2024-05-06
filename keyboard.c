@@ -32,10 +32,13 @@ void* keyboard_thread(void* data)
             case 'r':
                 ev.type = EV_RESET_CHUNK;
                 break;
-            case 'x':
+            case 'p':
                 ev.type = EV_SAVE_IMAGE;
                 break;
-            case 'p':
+            case 'e':
+                ev.type = EV_ERASE_IMAGE;
+                break;
+            case 'f':
                 ev.type = EV_REFRESH;
                 break;
             default:

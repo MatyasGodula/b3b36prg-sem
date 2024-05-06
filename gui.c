@@ -47,7 +47,18 @@ void gui_refresh(void)
     }
 }
 
-void* gui_win_thread(void* d)
+void clean_image(void)
+{
+    if (gui.img) {
+        clean_grid();
+        for (int i = 0; i < gui.w * gui.h * 3; ++i) {
+            gui.img[i] = 0;
+        }
+    }
+    update_image(gui.w, gui.h, gui.img);
+}
+
+void* gui_win_thread(void* d) 
 {
     info("GuiWin thread started");
     bool quit = false;
@@ -57,33 +68,33 @@ void* gui_win_thread(void* d)
         if (SDL_PollEvent(&sdl_event)) {
             if (sdl_event.type == SDL_KEYDOWN) {
                 switch(sdl_event.key.keysym.sym) {
-                    case SDLK_q:
-                        ev.type = EV_QUIT; 
+                        case SDLK_q:
+                            ev.type = EV_QUIT;
                         queue_push(ev);// quits the app 
-                        info("quit");
-                        break;
-                    case SDLK_s:
-                        info("s received");
-                        ev.type = EV_SET_COMPUTE;
-                        break;
-                    case SDLK_c:
-                        info("c received");
-                        ev.type = EV_COMPUTE;
-                        break;
-                    case SDLK_a:
-                        info("a received");
-                        ev.type = EV_ABORT;
-                        break;
-                    case SDLK_g:
-                        info("g received");
-                        ev.type = EV_GET_VERSION;
-                        break;
-                    default:
-                        break;
-                }
-                
+                            info("quit");
+                            break;
+                        case SDLK_s:
+                            info("s received");
+                            ev.type = EV_SET_COMPUTE;
+                            break;
+                        case SDLK_c:
+                            info("c received");
+                            ev.type = EV_COMPUTE;
+                            break;
+                        case SDLK_a:
+                            info("a received");
+                            ev.type = EV_ABORT;
+                            break;
+                        case SDLK_g:
+                            info("g received");
+                            ev.type = EV_GET_VERSION;
+                            break;
+                        default:
+                            break;
+                    }
+
             } else if (sdl_event.type == SDL_KEYUP) {
-                info("keyup");
+                    info("keyup");
             } else {
                 //debug("SDL_PollEvent initialized");
             }

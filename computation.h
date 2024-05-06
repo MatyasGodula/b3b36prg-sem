@@ -21,6 +21,7 @@ bool compute(message* msg);
 void update_image(int w, int h, unsigned char* img);
 
 void update_data(const msg_compute_data* compute_data);
+void clean_grid(void);
 
 void get_grid_size(int *w, int *h);
 

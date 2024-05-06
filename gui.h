@@ -6,5 +6,6 @@ void gui_cleanup(void);
 void gui_refresh(void);
 
 void* gui_win_thread(void* d);
+void clean_image(void);
 
 #endif
