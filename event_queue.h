@@ -30,7 +30,8 @@ typedef enum {
    EV_PIPE_IN_MESSAGE,
    EV_TYPE_NUM,
    EV_SAVE_IMAGE,
-   EV_ERASE_IMAGE
+   EV_ERASE_IMAGE,
+   EV_HELP
 } event_type;
 
 typedef struct {

@@ -10,11 +10,12 @@
 #include "computation.h"
 #include "gui.h"
 #include "xwin_sdl.h"
+#include "help.h"
 
 static void process_pipe_message(event* const ev);
 
 /*
-manages different actions that are supposed to happen in the app, evaluates 
+manages different actions that are supposed to happen in the app, evaluates the situation and acts accordingly
 */
 
 void* main_thread(void* data) 
@@ -26,6 +27,8 @@ void* main_thread(void* data)
     uint8_t msg_buffer[sizeof(message)];
     int msg_len;
     bool quit = false;
+
+    print_help();
 
     computation_init();
     gui_init();
@@ -63,6 +66,9 @@ void* main_thread(void* data)
                 break;
             case EV_REFRESH:
                 gui_refresh();
+                break;
+            case EV_HELP:
+                print_help();
                 break;
             default:
                 break;

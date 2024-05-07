@@ -41,6 +41,9 @@ void* keyboard_thread(void* data)
             case 'f':
                 ev.type = EV_REFRESH;
                 break;
+            case 'h':
+                ev.type = EV_HELP;
+                break;
             default:
                 break;
         } // end of switch
