@@ -1,9 +1,12 @@
 #include "computation.h"
 #include "utils.h"
+#include "event_queue.h"
 
 #define R_CALC(t) (9 * (1 - t) * t*t*t * 255)
 #define G_CALC(t) (15 * (1 - t)*(1 - t) * t*t * 255)
 #define B_CALC(t) (8.5 * (1 - t)*(1 - t)*(1 - t) * t * 255)
+
+#define NUMBER_OF_PARAMETERS 7
 
 static struct {
     double c_re;
@@ -40,7 +43,7 @@ static struct {
     .c_re = -0.4,
     .c_im = 0.6,
 
-    .n = 60,
+    .n = 400,
 
     .range_re_min = -1.6,
     .range_re_max = 1.6,
@@ -59,6 +62,80 @@ static struct {
     .done = false
 };
 
+typedef struct {
+    int type;
+    void* pointer;
+    char* name;
+} pars;
+
+enum types { INTEGER, DOUBLE, BOOL, UINT8 };
+
+pars array[NUMBER_OF_PARAMETERS] = {
+    { .type = DOUBLE, .pointer = &comp.c_re, .name = "real constant" },
+    { .type = DOUBLE, .pointer = &comp.c_im, .name = "imaginary constant" },
+    { .type = INTEGER, .pointer = &comp.n, .name = "number of iterations" },
+    { .type = DOUBLE, .pointer = &comp.range_re_min, .name = "minimum real range" },
+    { .type = DOUBLE, .pointer = &comp.range_re_max, .name = "maximum real range" },
+    { .type = DOUBLE, .pointer = &comp.range_im_min, .name = "minimum imaginary range" },
+    { .type = DOUBLE, .pointer = &comp.range_im_max, .name = "maximum imaginary range" }
+};
+
+void print_check() 
+{
+    printf("c_re: %lf\n", comp.c_re);
+    printf("c_im: %lf\n", comp.c_im);
+    printf("n: %d\n", comp.n);
+    printf("range_re_min: %lf\n", comp.range_re_min);
+    printf("range_re_max: %lf\n", comp.range_re_max);
+    printf("range_im_min: %lf\n", comp.range_im_min);
+    printf("range_im_max: %lf\n", comp.range_im_max);
+}
+
+bool read_input_file(FILE* file)
+{
+    char c;
+    int idx = 0;
+
+    while (((c = fgetc(file)) != EOF) && idx < NUMBER_OF_PARAMETERS) {
+        if (c == '[') {
+            debug("[] detected");
+            switch(array[idx].type) {
+                case DOUBLE:
+                    double value_db;
+                    int ret_db = fscanf(file, "%lf", &value_db);
+                    if (ret_db != 1) {
+                        fprintf(stderr, "cannot read from file value: %s\n", array[idx].name);
+                        return false;
+                    } else {
+                        printf("read value: %lf\n", value_db);
+                        *(double *)(array[idx].pointer) = value_db;
+                    }
+                    idx++;
+                    break;
+                case INTEGER:
+                    int value_int;
+                    int ret_ui = fscanf(file, "%d", &value_int);
+                    if (ret_ui != 1) {
+                        fprintf(stderr, "cannot read from file value: %s\n", array[idx].name);
+                        return false;
+                    } else {
+                        printf("read value: %d\n", value_int);
+                        *(int *)(array[idx].pointer) = value_int;
+                    }
+                    idx++;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    return true;
+}
+
+void change_iters(int number) 
+{
+    comp.n = number;
+}
 
 void computation_init(void) 
 {
@@ -185,3 +262,175 @@ void update_image(int w, int h, unsigned char* img)
     info("image is being updated");
 }
 
+// --------------------------------------------------------------------- local_computation -------------------------------------
+
+static struct {
+
+    double constant_real;
+    double constant_imag;
+
+    double real_increment; // the increment for each pixel on x axis
+    double imag_increment; // the increment for each pixel on y axis
+
+    uint8_t n; // number of iteration per pixel
+
+    // current chunk computation
+    uint8_t cid; // chunk id
+    double start_real_chunk; // start of the real coordinates for this chunk
+    double start_imag_chunk; // start of the imaginary coordinates for this chunk
+    uint8_t n_real; // number of real cells
+    uint8_t n_imag; // number of imaginary cells
+    uint8_t iters;
+
+    // current pixel to be computed, it is changed at the end of computation
+    double real_coords;
+    uint8_t x_calculated;
+    double imag_coords;
+    uint8_t y_calculated;
+
+    bool computing;
+    bool done;
+    bool aborted;
+    bool set_up;
+
+} local_computation = {
+    .computing = false,
+    .done = false,
+    .aborted = false,
+    .set_up = false
+};
+
+void set_up_local_computation()
+{
+    local_computation.constant_imag = comp.c_im;
+    local_computation.constant_real = comp.c_re;
+    local_computation.real_increment = comp.d_re;
+    local_computation.imag_increment = comp.d_im;
+    local_computation.n = comp.n;
+    local_computation.set_up = true;
+}
+
+void set_up_local_chunk_computation()
+{
+    if (local_computation.set_up) {
+        // translates the message to the program's static struct
+        local_computation.cid = comp.cid;
+        local_computation.start_real_chunk = comp.chunk_re;
+        local_computation.start_imag_chunk = comp.chunk_im;
+        local_computation.n_real = comp.chunk_n_re;
+        local_computation.n_imag = comp.chunk_n_im;
+        // sets up the coord numbers for sending in compute_data
+        local_computation.x_calculated = 0;
+        local_computation.y_calculated = 0;
+        local_computation.computing = true;
+        local_computation.aborted = false;
+        local_computation.done = false;
+        // real coords in bool to keep track of which pixel is being computed
+        local_computation.real_coords = local_computation.start_real_chunk;
+        local_computation.imag_coords = local_computation.start_imag_chunk;
+    }
+}
+
+uint8_t iteration_calculation()
+{
+    double z_real = local_computation.real_coords;
+    double z_imag = local_computation.imag_coords;
+    double const_real = local_computation.constant_real;
+    double const_imag = local_computation.constant_imag;
+    uint8_t max_iters = local_computation.n;
+    double z_real2 = z_real * z_real;
+    double z_imag2 = z_imag * z_imag;
+
+    uint8_t iters = 0;
+
+    while ((z_real2 + z_imag2) <= 4.0 && iters < max_iters) {
+        double temp_real = z_real2 - z_imag2 + const_real;
+        double temp_imag = 2.0 * z_real * z_imag + const_imag;
+
+        z_real = temp_real;
+        z_imag = temp_imag;
+
+        z_real2 = z_real * z_real;
+        z_imag2 = z_imag * z_imag;
+
+        iters++;
+    }
+    return iters;
+}
+
+void compute_chunk_local() 
+{
+    while(!local_computation.done) {
+        if (local_computation.set_up && !local_computation.aborted && local_computation.computing && !local_computation.done) {
+            local_computation.iters = iteration_calculation();
+            update_data_local();
+            local_computation.real_coords += local_computation.real_increment;
+            local_computation.x_calculated += 1;
+            if (local_computation.x_calculated >= local_computation.n_real) {
+                local_computation.real_coords = local_computation.start_real_chunk;
+                local_computation.x_calculated = 0;
+                local_computation.imag_coords += local_computation.imag_increment;
+                local_computation.y_calculated += 1;
+                if (local_computation.y_calculated >= local_computation.n_imag) {
+                    local_computation.computing = false;
+                    local_computation.done = true;
+                }
+            }
+        }
+    }
+}
+
+void update_data_local()
+{
+    if (local_computation.cid == comp.cid) {
+        const int idx = comp.cur_x + local_computation.x_calculated + (comp.cur_y + local_computation.y_calculated) * comp.grid_w;
+        if (idx >= 0 && idx < (comp.grid_w * comp.grid_h)) {
+            comp.grid[idx] = local_computation.iters;
+        }
+        if ((comp.cid + 1) >= comp.nbr_chunks && (local_computation.x_calculated + 1) == comp.chunk_n_re && (local_computation.y_calculated + 1) == comp.chunk_n_im) {
+            comp.done = true;
+            comp.computing = false;
+        }
+    } else {
+        warning("Received chunk with unexpected chunk id");
+    }
+}
+
+bool compute_local()
+{
+    if (!is_computing()) { // first chunk
+        comp.cid = 0;
+        comp.computing = true;
+        comp.cur_x = comp.cur_y = 0; // start computation of the whole image
+        comp.chunk_re = comp.range_re_min; // upper-"left" corner of the image
+        comp.chunk_im = comp.range_im_max; // "upper"-left corner of the image
+    } else { // next chunk
+        comp.cid += 1;
+        if (comp.cid < comp.nbr_chunks) {
+            comp.cur_x += comp.chunk_n_re;
+            comp.chunk_re += comp.chunk_n_re * comp.d_re;
+            if (comp.cur_x >= comp.grid_w) {
+                comp.cur_x = 0;
+                comp.chunk_re = comp.range_re_min;
+                comp.cur_y += comp.chunk_n_im;
+                comp.chunk_im += comp.chunk_n_im * comp.d_im; // mistake on this line
+            }
+        } else { // all has been computed
+        }
+    }
+
+    if (comp.computing) {
+        local_computation.cid = comp.cid;
+        local_computation.start_real_chunk = comp.chunk_re;
+        local_computation.start_imag_chunk = comp.chunk_im;
+        local_computation.n_real = comp.chunk_n_re;
+        local_computation.n_imag = comp.chunk_n_im;
+        set_up_local_chunk_computation();
+        compute_chunk_local();
+    }
+
+    event ev;
+    ev.type = EV_COMPUTE_CPU;
+    queue_push(ev);
+    return is_computing();
+}

@@ -1,0 +1,14 @@
+This is a file that is meant to take in values for the fractal visualization
+
+guide: To input parameters just change the values inside of the square brackets
+       keep in mind, if you input incompatible values the program is going to say no
+
+    constant on the real axis ........................................................................... [-0.4]
+    constant on the imaginary axis ...................................................................... [0.6]
+
+    number of iterations (stored in a uint8_t so no larger than 255) .................................... [180]
+
+    minimum range of the real axis ...................................................................... [-1.6]
+    maximum range of the real axis ...................................................................... [1.6]
+    minimum range of the imaginary axis ................................................................. [-1.1]
+    maximum range of the imaginary axis ................................................................. [1.1]

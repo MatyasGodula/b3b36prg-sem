@@ -27,11 +27,16 @@ void* main_thread(void* data)
     uint8_t msg_buffer[sizeof(message)];
     int msg_len;
     bool quit = false;
-
-    print_help();
-
     computation_init();
     gui_init();
+    print_help();
+    print_check();
+    FILE* file = fopen("input_parameters.txt", "r");
+    bool success = read_input_file(file);
+    if (!success) {
+        set_quit();
+    }
+    print_check();
     // initialize computation & visualization
     do {
         event ev = queue_pop();
@@ -46,6 +51,7 @@ void* main_thread(void* data)
                 break;
             case EV_SET_COMPUTE:
                 info(set_compute(&msg) ? "set_compute success" : "set_compute fail");
+                set_up_local_computation();
                 break;
             case EV_COMPUTE:
                 info(compute(&msg) ? "compute success" : "compute fail");
@@ -69,6 +75,14 @@ void* main_thread(void* data)
                 break;
             case EV_HELP:
                 print_help();
+                break;
+            case EV_COMPUTE_CPU:
+                if (is_done()) {
+                    gui_refresh();
+                    info("computation done");
+                } else {
+                    compute_local();
+                }
                 break;
             default:
                 break;

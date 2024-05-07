@@ -31,7 +31,8 @@ typedef enum {
    EV_TYPE_NUM,
    EV_SAVE_IMAGE,
    EV_ERASE_IMAGE,
-   EV_HELP
+   EV_HELP,
+   EV_ANIMATION
 } event_type;
 
 typedef struct {

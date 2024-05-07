@@ -27,7 +27,7 @@ void* keyboard_thread(void* data)
                 ev.type = EV_ABORT;
                 break;
             case 'l':
-                ev.type = EV_CLEAR_BUFFER;
+                ev.type = EV_COMPUTE_CPU;
                 break;
             case 'r':
                 ev.type = EV_RESET_CHUNK;
