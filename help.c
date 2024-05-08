@@ -20,6 +20,7 @@ void print_help()
 
     printf(YELLOW "s" RESET " ..... sets up the computation, program can not compute without this\n");
     printf(GREEN "c" RESET " ..... starts the computation and drawing of the image\n");
+    printf(BRIGHT_BLUE "1" RESET " ..... calculates te fractal locally\n");
     printf(BLUE "e" RESET " ..... resets the whole image\n");
     printf(MAGENTA "p" RESET " ..... saves the image that is currently displayed in the window\n");
     printf(CYAN "a" RESET " ..... aborts the currently running program\n");

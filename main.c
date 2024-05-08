@@ -30,13 +30,13 @@ void* main_thread(void* data)
     computation_init();
     gui_init();
     print_help();
-    print_check();
+    //print_check();
     FILE* file = fopen("input_parameters.txt", "r");
     bool success = read_input_file(file);
     if (!success) {
         set_quit();
     }
-    print_check();
+    //print_check();
     // initialize computation & visualization
     do {
         event ev = queue_pop();
@@ -79,7 +79,18 @@ void* main_thread(void* data)
             case EV_COMPUTE_CPU:
                 if (is_done()) {
                     gui_refresh();
-                    info("computation done");
+                    if (is_video()) {
+                        if (change_iters(video_target())) {
+                            cancel_done();
+                            print_check();
+                            set_up_local_computation();
+                            compute_local();
+                        } else {
+                            info("video playback done");
+                        }
+                    } else {
+                        info("computation done");
+                    }
                 } else {
                     compute_local();
                 }

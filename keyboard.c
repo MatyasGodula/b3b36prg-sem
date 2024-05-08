@@ -26,7 +26,7 @@ void* keyboard_thread(void* data)
             case 'a': // cancels the current calculation process
                 ev.type = EV_ABORT;
                 break;
-            case 'l':
+            case '1':
                 ev.type = EV_COMPUTE_CPU;
                 break;
             case 'r':

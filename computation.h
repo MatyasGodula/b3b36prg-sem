@@ -15,7 +15,12 @@ bool is_computing(void);
 bool is_done(void);
 
 // functionality for the animation
-void change_iters(int number);
+bool change_iters(int target);
+void zero_iters();
+void cancel_done();
+int video_target();
+
+bool is_video();
 
 void abort_comp(void);
 

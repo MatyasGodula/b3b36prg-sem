@@ -6,7 +6,7 @@
 #define G_CALC(t) (15 * (1 - t)*(1 - t) * t*t * 255)
 #define B_CALC(t) (8.5 * (1 - t)*(1 - t)*(1 - t) * t * 255)
 
-#define NUMBER_OF_PARAMETERS 7
+#define NUMBER_OF_PARAMETERS 8
 
 static struct {
     double c_re;
@@ -38,6 +38,9 @@ static struct {
     uint8_t* grid;
     bool computing;
     bool done;
+    bool video;
+
+    int video_target;
 
 } comp = {
     .c_re = -0.4,
@@ -59,7 +62,8 @@ static struct {
     .chunk_n_im = 48,
     
     .computing = false,
-    .done = false
+    .done = false,
+    .video = true
 };
 
 typedef struct {
@@ -77,7 +81,8 @@ pars array[NUMBER_OF_PARAMETERS] = {
     { .type = DOUBLE, .pointer = &comp.range_re_min, .name = "minimum real range" },
     { .type = DOUBLE, .pointer = &comp.range_re_max, .name = "maximum real range" },
     { .type = DOUBLE, .pointer = &comp.range_im_min, .name = "minimum imaginary range" },
-    { .type = DOUBLE, .pointer = &comp.range_im_max, .name = "maximum imaginary range" }
+    { .type = DOUBLE, .pointer = &comp.range_im_max, .name = "maximum imaginary range" },
+    { .type = BOOL, .pointer = &comp.video, .name = "video"}
 };
 
 void print_check() 
@@ -89,6 +94,7 @@ void print_check()
     printf("range_re_max: %lf\n", comp.range_re_max);
     printf("range_im_min: %lf\n", comp.range_im_min);
     printf("range_im_max: %lf\n", comp.range_im_max);
+    printf("video: %d\n", comp.video);
 }
 
 bool read_input_file(FILE* file)
@@ -98,7 +104,6 @@ bool read_input_file(FILE* file)
 
     while (((c = fgetc(file)) != EOF) && idx < NUMBER_OF_PARAMETERS) {
         if (c == '[') {
-            debug("[] detected");
             switch(array[idx].type) {
                 case DOUBLE:
                     double value_db;
@@ -107,7 +112,6 @@ bool read_input_file(FILE* file)
                         fprintf(stderr, "cannot read from file value: %s\n", array[idx].name);
                         return false;
                     } else {
-                        printf("read value: %lf\n", value_db);
                         *(double *)(array[idx].pointer) = value_db;
                     }
                     idx++;
@@ -124,18 +128,46 @@ bool read_input_file(FILE* file)
                     }
                     idx++;
                     break;
+                case BOOL:
+                    char ch = fgetc(file);
+                    if (ch != 'Y' && ch != 'n') {
+                        fprintf(stderr, "cannot read from file value: %s\n", array[idx].name);
+                        return false;
+                    } else {
+                        if (ch == 'Y') {
+                            *(bool *)(array[idx].pointer) = true;
+                        } else if (ch == 'n') {
+                            *(bool *)(array[idx].pointer) = false;
+                        }
+                    }
                 default:
                     break;
             }
         }
     }
+    if (comp.video) {
+        comp.video_target = comp.n;
+        comp.n = 0;
+    }
     return true;
 }
 
-void change_iters(int number) 
+bool change_iters(int target) 
 {
-    comp.n = number;
+    comp.n += 1;
+    if (comp.n > target) {
+        return false;
+    } 
+    return true;
 }
+
+int video_target() { return comp.video_target; }
+
+void zero_iters() { comp.n = 0; }
+
+void cancel_done() { comp.done = false; }
+
+bool is_video() { return comp.video; }
 
 void computation_init(void) 
 {
