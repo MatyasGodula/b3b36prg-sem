@@ -13,6 +13,7 @@ void computation_cleanup(void);
 
 bool is_computing(void);
 bool is_done(void);
+void set_video();
 
 // functionality for the animation
 bool change_iters(int target);
@@ -43,5 +44,10 @@ void compute_chunk_local();
 void update_data_local();
 bool compute_local();
 void set_up_local_computation();
+
+// --------------------------------------------------------------------- image_interactions -------------------------------------
+
+void zoom_in();
+void zoom_out();
 
 #endif

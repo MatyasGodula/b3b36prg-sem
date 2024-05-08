@@ -53,6 +53,11 @@ void* main_thread(void* data)
                 info(set_compute(&msg) ? "set_compute success" : "set_compute fail");
                 set_up_local_computation();
                 break;
+            case EV_VIDEO:
+                set_video();
+                event ev1 = { .type = EV_COMPUTE_CPU };
+                queue_push(ev1);
+                break;
             case EV_COMPUTE:
                 info(compute(&msg) ? "compute success" : "compute fail");
                 break;

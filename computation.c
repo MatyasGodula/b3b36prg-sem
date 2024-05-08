@@ -145,11 +145,12 @@ bool read_input_file(FILE* file)
             }
         }
     }
-    if (comp.video) {
-        comp.video_target = comp.n;
-        comp.n = 0;
-    }
     return true;
+}
+
+void set_video() {
+    comp.video_target = comp.n;
+    comp.n = 0;
 }
 
 bool change_iters(int target) 
@@ -465,4 +466,22 @@ bool compute_local()
     ev.type = EV_COMPUTE_CPU;
     queue_push(ev);
     return is_computing();
+}
+
+// --------------------------------------------------------------------- image_interactions -------------------------------------
+
+void zoom_in() 
+{
+    comp.range_re_min *= 0.8;
+    comp.range_re_max *= 0.8;
+    comp.range_im_min *= 0.8;
+    comp.range_im_max *= 0.8;
+}
+
+void zoom_out() 
+{
+    comp.range_re_min *= 1.2;
+    comp.range_re_max *= 1.2;
+    comp.range_im_min *= 1.2;
+    comp.range_im_max *= 1.2;
 }

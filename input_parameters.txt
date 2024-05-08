@@ -14,4 +14,4 @@ guide: To input parameters just change the values inside of the square brackets
     maximum range of the imaginary axis ................................................................. [1.1]
 
     would you like to see a video of the fractal Y/n .................................................... [Y]
-	(the fractal will be shown from 0 to 255 since the number of iterations is store in a uint8_t)
+	(the fractal will be shown from 0 to 255 since the number of iterations is stored in a uint8_t)
