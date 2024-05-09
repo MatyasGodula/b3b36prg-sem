@@ -49,5 +49,9 @@ void set_up_local_computation();
 
 void zoom_in();
 void zoom_out();
+void move_left(double move_factor);
+void move_right(double move_factor);
+void move_up(double move_factor);
+void move_down(double move_factor);
 
 #endif

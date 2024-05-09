@@ -40,6 +40,7 @@ void* main_thread(void* data)
     // initialize computation & visualization
     do {
         event ev = queue_pop();
+        event ev1; // if i need to add more events
         msg.type = MSG_NBR;
         switch (ev.type) {
             case EV_QUIT:
@@ -54,9 +55,11 @@ void* main_thread(void* data)
                 set_up_local_computation();
                 break;
             case EV_VIDEO:
-                set_video();
-                event ev1 = { .type = EV_COMPUTE_CPU };
-                queue_push(ev1);
+                if (is_video()) {
+                    set_video();
+                    ev1.type = EV_COMPUTE_CPU;
+                    queue_push(ev1);
+                }
                 break;
             case EV_COMPUTE:
                 info(compute(&msg) ? "compute success" : "compute fail");
@@ -80,6 +83,60 @@ void* main_thread(void* data)
                 break;
             case EV_HELP:
                 print_help();
+                break;
+            case EV_ZOOM_IN:
+                if (!is_video()) {
+                    zoom_in();
+                    ev.type = EV_SET_COMPUTE;
+                    ev1.type = EV_COMPUTE_CPU;
+                    queue_push(ev);
+                    queue_push(ev1);
+                }
+                break;
+            case EV_ZOOM_OUT:
+                if (!is_video()) {
+                    zoom_out();
+                    ev.type = EV_SET_COMPUTE;
+                    ev1.type = EV_COMPUTE_CPU;
+                    queue_push(ev);
+                    queue_push(ev1);
+                }
+                break;
+            case EV_MOVE_LEFT:
+                if (!is_video()) {
+                    move_left(0.2);
+                    ev.type = EV_SET_COMPUTE;
+                    ev1.type = EV_COMPUTE_CPU;
+                    queue_push(ev);
+                    queue_push(ev1);
+                }
+                break;
+            case EV_MOVE_RIGHT:
+                if (!is_video()) {
+                    move_right(0.2);
+                    ev.type = EV_SET_COMPUTE;
+                    ev1.type = EV_COMPUTE_CPU;
+                    queue_push(ev);
+                    queue_push(ev1);
+                }
+                break;
+            case EV_MOVE_UP:
+                if (!is_video()) {
+                    move_up(0.2);
+                    ev.type = EV_SET_COMPUTE;
+                    ev1.type = EV_COMPUTE_CPU;
+                    queue_push(ev);
+                    queue_push(ev1);
+                }
+                break;
+            case EV_MOVE_DOWN:
+                if (!is_video()) {
+                    move_down(0.2);
+                    ev.type = EV_SET_COMPUTE;
+                    ev1.type = EV_COMPUTE_CPU;
+                    queue_push(ev);
+                    queue_push(ev1);
+                }
                 break;
             case EV_COMPUTE_CPU:
                 if (is_done()) {

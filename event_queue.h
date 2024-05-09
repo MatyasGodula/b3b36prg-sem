@@ -34,7 +34,11 @@ typedef enum {
    EV_HELP,
    EV_VIDEO,
    EV_ZOOM_IN,
-   EV_ZOOM_OUT
+   EV_ZOOM_OUT,
+   EV_MOVE_LEFT,
+   EV_MOVE_RIGHT,
+   EV_MOVE_UP,
+   EV_MOVE_DOWN
 } event_type;
 
 typedef struct {

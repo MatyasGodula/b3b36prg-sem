@@ -40,6 +40,8 @@ static struct {
     bool done;
     bool video;
 
+    bool video_request;
+
     int video_target;
 
 } comp = {
@@ -62,8 +64,7 @@ static struct {
     .chunk_n_im = 48,
     
     .computing = false,
-    .done = false,
-    .video = true
+    .done = false
 };
 
 typedef struct {
@@ -472,16 +473,72 @@ bool compute_local()
 
 void zoom_in() 
 {
-    comp.range_re_min *= 0.8;
-    comp.range_re_max *= 0.8;
-    comp.range_im_min *= 0.8;
-    comp.range_im_max *= 0.8;
+    // Calculate the center of the current range
+    double center_re = (comp.range_re_min + comp.range_re_max) / 2.0;
+    double center_im = (comp.range_im_min + comp.range_im_max) / 2.0;
+    
+    double zoom_factor = 0.2;
+    
+    double range_re_half = (comp.range_re_max - comp.range_re_min) / 2.0;
+    double range_im_half = (comp.range_im_max - comp.range_im_min) / 2.0;
+
+    comp.range_re_min = center_re - (range_re_half * (1 - zoom_factor));
+    comp.range_re_max = center_re + (range_re_half * (1 - zoom_factor));
+    comp.range_im_min = center_im - (range_im_half * (1 - zoom_factor));
+    comp.range_im_max = center_im + (range_im_half * (1 - zoom_factor));
+    
+    comp.d_re = (comp.range_re_max - comp.range_re_min) / (1.0 * comp.grid_w);
+    comp.d_im = -(comp.range_im_max - comp.range_im_min) / (1.0 * comp.grid_h);
 }
+
 
 void zoom_out() 
 {
-    comp.range_re_min *= 1.2;
-    comp.range_re_max *= 1.2;
-    comp.range_im_min *= 1.2;
-    comp.range_im_max *= 1.2;
+    double center_re = (comp.range_re_min + comp.range_re_max) / 2.0;
+    double center_im = (comp.range_im_min + comp.range_im_max) / 2.0;
+    
+    double zoom_factor = 0.2;
+    
+    double range_re_half = (comp.range_re_max - comp.range_re_min) / 2.0;
+    double range_im_half = (comp.range_im_max - comp.range_im_min) / 2.0;
+
+    comp.range_re_min = center_re - (range_re_half * (1 + zoom_factor));
+    comp.range_re_max = center_re + (range_re_half * (1 + zoom_factor));
+    comp.range_im_min = center_im - (range_im_half * (1 + zoom_factor));
+    comp.range_im_max = center_im + (range_im_half * (1 + zoom_factor));
+    
+    comp.d_re = (comp.range_re_max - comp.range_re_min) / (1.0 * comp.grid_w);
+    comp.d_im = -(comp.range_im_max - comp.range_im_min) / (1.0 * comp.grid_h);
+}
+
+void move_left(double move_factor)
+{
+    double range_width = comp.range_re_max - comp.range_re_min;
+    double shift = range_width * move_factor;
+    comp.range_re_min -= shift;
+    comp.range_re_max -= shift;
+}
+
+void move_right(double move_factor)
+{
+    double range_width = comp.range_re_max - comp.range_re_min;
+    double shift = range_width * move_factor;
+    comp.range_re_min += shift;
+    comp.range_re_max += shift;
+}
+
+void move_up(double move_factor)
+{
+    double range_height = comp.range_im_max - comp.range_im_min;
+    double shift = range_height * move_factor;
+    comp.range_im_min += shift;
+    comp.range_im_max += shift;
+}
+
+void move_down(double move_factor)
+{
+    double range_height = comp.range_im_max - comp.range_im_min;
+    double shift = range_height * move_factor;
+    comp.range_im_min -= shift;
+    comp.range_im_max -= shift;
 }

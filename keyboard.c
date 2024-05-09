@@ -47,6 +47,11 @@ void* keyboard_thread(void* data)
             case 'v':
                 ev.type = EV_VIDEO;
                 break;
+            case '+':
+                ev.type = EV_ZOOM_IN;
+                break;
+            case '-':
+                ev.type = EV_ZOOM_OUT;
             default:
                 break;
         } // end of switch

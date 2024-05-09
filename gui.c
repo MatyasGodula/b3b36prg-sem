@@ -9,7 +9,7 @@
 #include "event_queue.h"
 
 #ifndef SDL_EVENT_POLL_WAIT_MS
-#define SDL_EVENT_POLL_WAIT_MS 10
+#define SDL_EVENT_POLL_WAIT_MS 5
 #endif
 
 static struct {
@@ -63,14 +63,13 @@ void* gui_win_thread(void* d)
     info("GuiWin thread started");
     bool quit = false;
     SDL_Event sdl_event;
-    event ev;
+    event ev = {.type = EV_TYPE_NUM};
     while (!quit) {
         if (SDL_PollEvent(&sdl_event)) {
             if (sdl_event.type == SDL_KEYDOWN) {
                 switch(sdl_event.key.keysym.sym) {
                         case SDLK_q:
                             ev.type = EV_QUIT;
-                        queue_push(ev);// quits the app 
                             info("quit");
                             break;
                         case SDLK_s:
@@ -89,9 +88,47 @@ void* gui_win_thread(void* d)
                             info("g received");
                             ev.type = EV_GET_VERSION;
                             break;
+// ------------------------ image control -------------------------
+                        case SDLK_LEFT:
+                            info("left arrow received");
+                            ev.type = EV_MOVE_LEFT;
+                            break;
+                        case SDLK_RIGHT:
+                            info("right arrow received");
+                            ev.type = EV_MOVE_RIGHT;
+                            break;
+                        case SDLK_UP:
+                            info("up arrow received");
+                            ev.type = EV_MOVE_UP;
+                            break;
+                        case SDLK_DOWN:
+                            info("down arrow received");
+                            ev.type = EV_MOVE_DOWN;
+                            break;
+                        case SDLK_EQUALS:
+                            info("+ received");
+                            ev.type = EV_ZOOM_IN;
+                            break;
+                        case SDLK_MINUS:
+                            info("- received");
+                            ev.type = EV_ZOOM_OUT;
+                            break;
+// ------------------------ image control -------------------------
+                        case SDLK_p:
+                            ev.type = EV_SAVE_IMAGE;
+                            break;
+                        case SDLK_l:
+                            ev.type = EV_ERASE_IMAGE;
+                            break;
+                        case SDLK_v:
+                            ev.type = EV_VIDEO;
+                            break; 
                         default:
                             break;
-                    }
+                } // end of switch
+                if (ev.type != EV_TYPE_NUM) {
+                    queue_push(ev);
+                }
 
             } else if (sdl_event.type == SDL_KEYUP) {
                     info("keyup");
