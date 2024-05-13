@@ -12,7 +12,6 @@ void* keyboard_thread(void* data)
     event ev;
     while (!is_quit() && (c = getchar()) != 'q') {
         ev.type = EV_TYPE_NUM;
-        printf("character: %c\n", c);
         switch(c) {
             case 'g': // request the current version of the module
                 ev.type = EV_GET_VERSION;
@@ -30,7 +29,7 @@ void* keyboard_thread(void* data)
                 ev.type = EV_COMPUTE_CPU;
                 break;
             case 'r':
-                ev.type = EV_RESET_CHUNK;
+                ev.type = EV_READ;
                 break;
             case 'p':
                 ev.type = EV_SAVE_IMAGE;

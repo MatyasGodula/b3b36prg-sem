@@ -36,6 +36,7 @@ void* main_thread(void* data)
     if (!success) {
         set_quit();
     }
+    fclose(file);
     //print_check();
     // initialize computation & visualization
     do {
@@ -50,6 +51,16 @@ void* main_thread(void* data)
             case EV_GET_VERSION:
                 msg.type = MSG_GET_VERSION;
                 break;
+            case EV_READ:
+                FILE* file = fopen("input_parameters.txt", "r");
+                bool success = read_input_file(file);
+                fclose(file);
+                if (!success) {
+                    set_quit();
+                    break;
+                }
+                ev.type = EV_SET_COMPUTE;
+                queue_push(ev);
             case EV_SET_COMPUTE:
                 info(set_compute(&msg) ? "set_compute success" : "set_compute fail");
                 set_up_local_computation();
@@ -139,22 +150,21 @@ void* main_thread(void* data)
                 }
                 break;
             case EV_COMPUTE_CPU:
-                if (is_done()) {
-                    gui_refresh();
-                    if (is_video()) {
-                        if (change_iters(video_target())) {
-                            cancel_done();
-                            print_check();
-                            set_up_local_computation();
-                            compute_local();
+                if (!quit) {
+                    if (is_done()) {
+                        gui_refresh();
+                        if (is_video()) {
+                            if (change_iters(video_target())) {
+                                cancel_done();
+                                set_up_local_computation();
+                                compute_local();
+                            } 
                         } else {
-                            info("video playback done");
+                            info("computation done / video playback done");
                         }
                     } else {
-                        info("computation done");
+                        compute_local();
                     }
-                } else {
-                    compute_local();
                 }
                 break;
             default:
@@ -164,7 +174,6 @@ void* main_thread(void* data)
             my_assert(fill_message_buf(&msg, msg_buffer, sizeof(message), &msg_len), __func__, __LINE__, __FILE__);
             // writes information back into the pipe_out
             if (write(pipe_out, msg_buffer, msg_len) == msg_len) {
-                debug("send data to pipe out");
             } else {
                 error("send message failed");
             }
@@ -186,7 +195,7 @@ void process_pipe_message(event* const ev)
     const message* msg =  ev->data.msg;
     switch (msg->type) {
         case MSG_OK:
-            info("OK");
+            info("message OK received");
             break;
         case MSG_VERSION:
             fprintf(stderr, "INFO: Module version %d.%d-p%d\n", msg->data.version.major, msg->data.version.minor, msg->data.version.patch);

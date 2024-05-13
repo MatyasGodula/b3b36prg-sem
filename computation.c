@@ -120,11 +120,13 @@ bool read_input_file(FILE* file)
                 case INTEGER:
                     int value_int;
                     int ret_ui = fscanf(file, "%d", &value_int);
-                    if (ret_ui != 1) {
+                    if (ret_ui != 1 || value_int < 0) {
                         fprintf(stderr, "cannot read from file value: %s\n", array[idx].name);
                         return false;
                     } else {
-                        printf("read value: %d\n", value_int);
+                        if (value_int > 255) {
+                            warning("the number of iterations inputted is larger than 255, the images are going to look strange");
+                        }
                         *(int *)(array[idx].pointer) = value_int;
                     }
                     idx++;
@@ -245,7 +247,6 @@ bool compute(message* msg)
         } else { // all has been computed
         }
     }
-    printf("computing chunk: %d\n", comp.cid);
 
     if (comp.computing && msg->type == MSG_COMPUTE) {
         msg->data.compute.cid = comp.cid;
@@ -293,7 +294,6 @@ void update_image(int w, int h, unsigned char* img)
         //*(img++) = (15 * (1-t)*(1-t) * t*t * 255);
         //*(img++) = (8.5 * (1-t)*(1-t)*(1-t) * t * 255);
     }
-    info("image is being updated");
 }
 
 // --------------------------------------------------------------------- local_computation -------------------------------------

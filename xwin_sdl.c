@@ -101,7 +101,6 @@ void xwin_redraw(int w, int h, unsigned char *img)
          *(px + scr->format->Bshift / 8) = *(img++);
       }
    }
-   debug("window successfully redrawn");
    SDL_UpdateWindowSurface(win);
 }
 

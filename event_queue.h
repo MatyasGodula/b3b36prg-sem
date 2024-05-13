@@ -38,7 +38,8 @@ typedef enum {
    EV_MOVE_LEFT,
    EV_MOVE_RIGHT,
    EV_MOVE_UP,
-   EV_MOVE_DOWN
+   EV_MOVE_DOWN,
+   EV_READ
 } event_type;
 
 typedef struct {

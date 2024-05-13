@@ -6,12 +6,12 @@ guide: To input parameters just change the values inside of the square brackets
     constant on the real axis ........................................................................... [-0.4]
     constant on the imaginary axis ...................................................................... [0.6]
 
-    number of iterations (stored in a uint8_t so no larger than 255) .................................... [180]
+    number of iterations (stored in a uint8_t so no larger than 255) .................................... [100]
 
     minimum range of the real axis ...................................................................... [-1.6]
     maximum range of the real axis ...................................................................... [1.6]
     minimum range of the imaginary axis ................................................................. [-1.1]
     maximum range of the imaginary axis ................................................................. [1.1]
 
-    would you like to see a video of the fractal Y/n .................................................... [n]
+    would you like to see a video of the fractal Y/n .................................................... [Y]
 	(the fractal will be shown from 0 to 255 since the number of iterations is stored in a uint8_t)

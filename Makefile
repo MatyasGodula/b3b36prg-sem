@@ -1,5 +1,5 @@
 CC:=ccache $(CC)
-CFLAGS+= -Wall -Werror -std=gnu99 -g
+CFLAGS+= -Wall -Werror -std=gnu99 -g -pedantic
 LDFLAGS=-lpthread
 
 #HW=prgsem
