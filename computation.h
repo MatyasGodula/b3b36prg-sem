@@ -24,6 +24,8 @@ int video_target();
 bool is_video();
 
 void abort_comp(void);
+bool is_aborted(void);
+void unabort(void);
 
 bool set_compute(message* msg);
 bool compute(message* msg);
@@ -33,7 +35,7 @@ void update_data(const msg_compute_data* compute_data);
 void clean_grid(void);
 
 void get_grid_size(int *w, int *h);
-bool read_input_file(FILE* file);
+bool read_input_file();
 
 void print_check();
 

@@ -31,12 +31,10 @@ void* main_thread(void* data)
     gui_init();
     print_help();
     //print_check();
-    FILE* file = fopen("input_parameters.txt", "r");
-    bool success = read_input_file(file);
+    bool success = read_input_file();
     if (!success) {
         set_quit();
     }
-    fclose(file);
     //print_check();
     // initialize computation & visualization
     do {
@@ -52,9 +50,7 @@ void* main_thread(void* data)
                 msg.type = MSG_GET_VERSION;
                 break;
             case EV_READ:
-                FILE* file = fopen("input_parameters.txt", "r");
-                bool success = read_input_file(file);
-                fclose(file);
+                bool success = read_input_file();
                 if (!success) {
                     set_quit();
                     break;
@@ -73,11 +69,14 @@ void* main_thread(void* data)
                 }
                 break;
             case EV_COMPUTE:
-                info(compute(&msg) ? "compute success" : "compute fail");
+               //printf("ev compute popped from the queue\n");
+                //info(compute(&msg) ? "compute success" : "compute fail");
+                compute(&msg);
                 break;
             case EV_ABORT:
+                //printf("abort sent to the comp_module\n");
                 msg.type = MSG_ABORT;
-                abort_comp();
+                //abort_comp();
                 break;
             case EV_PIPE_IN_MESSAGE:
                 process_pipe_message(&ev);
@@ -158,9 +157,14 @@ void* main_thread(void* data)
                                 cancel_done();
                                 set_up_local_computation();
                                 compute_local();
-                            } 
+                            } else {
+                                ev.type = EV_SET_COMPUTE;
+                                queue_push(ev);
+                            }
                         } else {
-                            info("computation done / video playback done");
+                            info("computation done");
+                            ev.type = EV_SET_COMPUTE;
+                            queue_push(ev);
                         }
                     } else {
                         compute_local();
@@ -204,10 +208,15 @@ void process_pipe_message(event* const ev)
             update_data(&(msg->data.compute_data));
             break;
         case MSG_DONE:
+            //printf("msg done received\n");
             gui_refresh();
             if (is_done()) {
-                info("Computation done");
+                //gui_refresh();
+                //info("Computation done");
+                event ev1 = { .type = EV_SET_COMPUTE };
+                queue_push(ev1);
             } else if (is_computing()) {
+                //printf("compute pushed into the queue\n");
                 event ev = { .type = EV_COMPUTE };
                 queue_push(ev);
             } else {}

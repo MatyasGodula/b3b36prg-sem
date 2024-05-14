@@ -39,6 +39,7 @@ static struct {
     bool computing;
     bool done;
     bool video;
+    bool aborted;
 
     bool video_request;
 
@@ -64,7 +65,8 @@ static struct {
     .chunk_n_im = 48,
     
     .computing = false,
-    .done = false
+    .done = false,
+    .aborted = false
 };
 
 typedef struct {
@@ -98,19 +100,24 @@ void print_check()
     printf("video: %d\n", comp.video);
 }
 
-bool read_input_file(FILE* file)
+bool read_input_file()
 {
     char c;
     int idx = 0;
+    double value_db;     
+    int value_int;       
+    char ch;             
+    int ret_db, ret_ui;  
+    FILE* file = fopen("input_parameters.txt", "r");
 
     while (((c = fgetc(file)) != EOF) && idx < NUMBER_OF_PARAMETERS) {
         if (c == '[') {
             switch(array[idx].type) {
                 case DOUBLE:
-                    double value_db;
-                    int ret_db = fscanf(file, "%lf", &value_db);
+                    ret_db = fscanf(file, "%lf", &value_db);
                     if (ret_db != 1) {
                         fprintf(stderr, "cannot read from file value: %s\n", array[idx].name);
+                        fclose(file);
                         return false;
                     } else {
                         *(double *)(array[idx].pointer) = value_db;
@@ -118,23 +125,24 @@ bool read_input_file(FILE* file)
                     idx++;
                     break;
                 case INTEGER:
-                    int value_int;
-                    int ret_ui = fscanf(file, "%d", &value_int);
+                    ret_ui = fscanf(file, "%d", &value_int);
                     if (ret_ui != 1 || value_int < 0) {
                         fprintf(stderr, "cannot read from file value: %s\n", array[idx].name);
+                        fclose(file);
                         return false;
                     } else {
                         if (value_int > 255) {
-                            warning("the number of iterations inputted is larger than 255, the images are going to look strange");
+                            fprintf(stderr, "the number of iterations inputted is larger than 255, the images are going to look strange");
                         }
                         *(int *)(array[idx].pointer) = value_int;
                     }
                     idx++;
                     break;
                 case BOOL:
-                    char ch = fgetc(file);
+                    ch = fgetc(file);
                     if (ch != 'Y' && ch != 'n') {
                         fprintf(stderr, "cannot read from file value: %s\n", array[idx].name);
+                        fclose(file);
                         return false;
                     } else {
                         if (ch == 'Y') {
@@ -148,8 +156,10 @@ bool read_input_file(FILE* file)
             }
         }
     }
+    fclose(file);
     return true;
 }
+
 
 void set_video() {
     comp.video_target = comp.n;
@@ -204,7 +214,11 @@ bool is_computing(void) { return comp.computing; }
 
 bool is_done(void) { return comp.done; }
 
-void abort_comp(void) { comp.computing = false; }
+void abort_comp(void) { comp.aborted = true; }
+
+bool is_aborted(void) { return comp.aborted; }
+
+void unabort(void) { comp.aborted = false; }
 
 bool set_compute(message* msg)
 {

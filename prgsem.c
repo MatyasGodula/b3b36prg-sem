@@ -11,7 +11,7 @@
 #include "gui.h"
 
 #ifndef IO_READ_TIMEOUT_MS
-#define IO_READ_TIMEOUT_MS 100
+#define IO_READ_TIMEOUT_MS 1
 #endif
 
 void* read_pipe_thread(void*); 
@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
     const char* thread_names[] = {"Keyboard", "ReadPipe", "Main", "GuiWin"};
     pthread_t threads[NUM_THREADS];
     void* (*thread_functions[])(void*) = {keyboard_thread, read_pipe_thread, main_thread, gui_win_thread};
-    void* thread_data[NUM_THREADS] = {};
+    void* thread_data[NUM_THREADS];
     thread_data[READ_PIPE_THREAD] = &pipe_in;
     thread_data[MAIN_THREAD] = &pipe_out;
 
