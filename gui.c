@@ -76,10 +76,10 @@ void* gui_win_thread(void* d)
                             info("s received");
                             ev.type = EV_SET_COMPUTE;
                             break;
-                        case SDLK_c:
+                        /*case SDLK_c:
                             info("c received");
                             ev.type = EV_COMPUTE;
-                            break;
+                            break;*/
                         case SDLK_a:
                             info("a received");
                             ev.type = EV_ABORT;

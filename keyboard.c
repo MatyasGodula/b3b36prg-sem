@@ -20,7 +20,7 @@ void* keyboard_thread(void* data)
                 ev.type = EV_SET_COMPUTE;
                 break;
             case 'c': // compute the fractal (test and control)
-                ev.type = EV_COMPUTE;
+                ev.type = EV_COMPUTE_KB;
                 break;
             case 'a': // cancels the current calculation process
                 ev.type = EV_ABORT;
@@ -51,6 +51,10 @@ void* keyboard_thread(void* data)
                 break;
             case '-':
                 ev.type = EV_ZOOM_OUT;
+                break;
+            case 'l':
+                ev.type = EV_RESET_CHUNK;
+                break;
             default:
                 break;
         } // end of switch

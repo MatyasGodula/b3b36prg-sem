@@ -220,6 +220,8 @@ bool is_aborted(void) { return comp.aborted; }
 
 void unabort(void) { comp.aborted = false; }
 
+void cancel_computing(void) { comp.computing = false; }
+
 bool set_compute(message* msg)
 {
     bool ret = !is_computing();

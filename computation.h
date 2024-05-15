@@ -27,6 +27,8 @@ void abort_comp(void);
 bool is_aborted(void);
 void unabort(void);
 
+void cancel_computing(void);
+
 bool set_compute(message* msg);
 bool compute(message* msg);
 void update_image(int w, int h, unsigned char* img);

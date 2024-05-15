@@ -68,12 +68,24 @@ void* main_thread(void* data)
                     queue_push(ev1);
                 }
                 break;
+            case EV_COMPUTE_KB:
+                if (is_computing() && !is_aborted()) {
+                    warning("Please do not press c twice in a row");
+                } else {
+                    unabort();
+                    compute(&msg);
+                }
+                break;
             case EV_COMPUTE:
-               //printf("ev compute popped from the queue\n");
-                //info(compute(&msg) ? "compute success" : "compute fail");
-                compute(&msg);
+                if (!is_aborted()) {
+                    compute(&msg);
+                }
+                break;
+            case EV_RESET_CHUNK:
+                cancel_computing();
                 break;
             case EV_ABORT:
+                abort_comp();
                 //printf("abort sent to the comp_module\n");
                 msg.type = MSG_ABORT;
                 //abort_comp();
@@ -208,7 +220,7 @@ void process_pipe_message(event* const ev)
             update_data(&(msg->data.compute_data));
             break;
         case MSG_DONE:
-            //printf("msg done received\n");
+            printf("msg done received\n");
             gui_refresh();
             if (is_done()) {
                 //gui_refresh();
@@ -216,7 +228,7 @@ void process_pipe_message(event* const ev)
                 event ev1 = { .type = EV_SET_COMPUTE };
                 queue_push(ev1);
             } else if (is_computing()) {
-                //printf("compute pushed into the queue\n");
+                printf("compute pushed into the queue\n");
                 event ev = { .type = EV_COMPUTE };
                 queue_push(ev);
             } else {}
