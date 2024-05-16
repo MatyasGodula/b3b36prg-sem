@@ -40,7 +40,8 @@ typedef enum {
    EV_MOVE_UP,
    EV_MOVE_DOWN,
    EV_READ,
-   EV_COMPUTE_KB
+   EV_COMPUTE_KB,
+   EV_COMPUTE_CPU_KB
 } event_type;
 
 typedef struct {

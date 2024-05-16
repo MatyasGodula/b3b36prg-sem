@@ -1,3 +1,12 @@
+/*
+ *
+ * Author1: Jan Faigl
+ * Author2: Matyas Godula
+ *
+ */
+
+
+
 #include <SDL.h>
 #include <stdio.h>
 #include <stdbool.h>

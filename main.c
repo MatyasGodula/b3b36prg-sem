@@ -1,3 +1,11 @@
+/*
+ *
+ * Author1: Jan Faigl
+ * Author2: Matyas Godula
+ *
+ */
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -10,7 +18,6 @@
 #include "computation.h"
 #include "gui.h"
 #include "xwin_sdl.h"
-#include "help.h"
 
 static void process_pipe_message(event* const ev);
 
@@ -62,15 +69,24 @@ void* main_thread(void* data)
                 set_up_local_computation();
                 break;
             case EV_VIDEO:
-                if (is_video()) {
-                    set_video();
-                    ev1.type = EV_COMPUTE_CPU;
-                    queue_push(ev1);
+                if (!is_computing() || (is_computing() && is_aborted())) {
+                    if (is_video()) {
+                        unabort();
+                        set_video();
+                        printf("EV_VIDEO print check:\n");
+                        print_check();
+                        ev1.type = EV_COMPUTE_CPU;
+                        queue_push(ev1);
+                    }
+                } else {
+                    warning("Please wait for the computation to finish, or press a to first abort");
                 }
                 break;
             case EV_COMPUTE_KB:
                 if (is_computing() && !is_aborted()) {
-                    warning("Please do not press c twice in a row");
+                    warning("Please do not press c while computing");
+                } else if (!is_set_up()) {
+                    warning("Please first set up the computation using s");
                 } else {
                     unabort();
                     compute(&msg);
@@ -107,57 +123,79 @@ void* main_thread(void* data)
                 print_help();
                 break;
             case EV_ZOOM_IN:
-                if (!is_video()) {
-                    zoom_in();
-                    ev.type = EV_SET_COMPUTE;
-                    ev1.type = EV_COMPUTE_CPU;
-                    queue_push(ev);
-                    queue_push(ev1);
+                if (!is_computing()) {
+                    if (!is_video()) {
+                        zoom_in();
+                        ev.type = EV_SET_COMPUTE;
+                        ev1.type = EV_COMPUTE_CPU;
+                        queue_push(ev);
+                        queue_push(ev1);
+                    }
                 }
                 break;
             case EV_ZOOM_OUT:
-                if (!is_video()) {
-                    zoom_out();
-                    ev.type = EV_SET_COMPUTE;
-                    ev1.type = EV_COMPUTE_CPU;
-                    queue_push(ev);
-                    queue_push(ev1);
+                if (!is_computing()) { 
+                    if (!is_video()) {
+                        zoom_out();
+                        ev.type = EV_SET_COMPUTE;
+                        ev1.type = EV_COMPUTE_CPU;
+                        queue_push(ev);
+                        queue_push(ev1);
+                    }
                 }
                 break;
             case EV_MOVE_LEFT:
-                if (!is_video()) {
-                    move_left(0.2);
-                    ev.type = EV_SET_COMPUTE;
-                    ev1.type = EV_COMPUTE_CPU;
-                    queue_push(ev);
-                    queue_push(ev1);
+                if (!is_computing()) {
+                    if (!is_video()) {
+                        move_left(0.2);
+                        ev.type = EV_SET_COMPUTE;
+                        ev1.type = EV_COMPUTE_CPU;
+                        queue_push(ev);
+                        queue_push(ev1);
+                    }
                 }
                 break;
             case EV_MOVE_RIGHT:
-                if (!is_video()) {
-                    move_right(0.2);
-                    ev.type = EV_SET_COMPUTE;
-                    ev1.type = EV_COMPUTE_CPU;
-                    queue_push(ev);
-                    queue_push(ev1);
+                if (!is_computing()) {
+                    if (!is_video()) {
+                        move_right(0.2);
+                        ev.type = EV_SET_COMPUTE;
+                        ev1.type = EV_COMPUTE_CPU;
+                        queue_push(ev);
+                        queue_push(ev1);
+                    }
                 }
                 break;
             case EV_MOVE_UP:
-                if (!is_video()) {
-                    move_up(0.2);
-                    ev.type = EV_SET_COMPUTE;
-                    ev1.type = EV_COMPUTE_CPU;
-                    queue_push(ev);
-                    queue_push(ev1);
+                if (!is_computing()) {
+                    if (!is_video()) {
+                        move_up(0.2);
+                        ev.type = EV_SET_COMPUTE;
+                        ev1.type = EV_COMPUTE_CPU;
+                        queue_push(ev);
+                        queue_push(ev1);
+                    }
                 }
                 break;
             case EV_MOVE_DOWN:
-                if (!is_video()) {
-                    move_down(0.2);
-                    ev.type = EV_SET_COMPUTE;
-                    ev1.type = EV_COMPUTE_CPU;
-                    queue_push(ev);
-                    queue_push(ev1);
+                if (!is_computing()) {
+                    if (!is_video()) {
+                        move_down(0.2);
+                        ev.type = EV_SET_COMPUTE;
+                        ev1.type = EV_COMPUTE_CPU;
+                        queue_push(ev);
+                        queue_push(ev1);
+                    }
+                }
+                break;
+            case EV_COMPUTE_CPU_KB:
+                if (is_local_set()) {
+                    if (!is_computing() || is_aborted()) {
+                        ev.type = EV_COMPUTE_CPU;
+                        queue_push(ev);
+                    }
+                } else {
+                    warning("Please first set up the computation using s");
                 }
                 break;
             case EV_COMPUTE_CPU:
@@ -165,13 +203,18 @@ void* main_thread(void* data)
                     if (is_done()) {
                         gui_refresh();
                         if (is_video()) {
-                            if (change_iters(video_target())) {
+                            if (change_iters(video_target()) && !is_aborted()) {
                                 cancel_done();
                                 set_up_local_computation();
                                 compute_local();
+                            } else if (is_aborted()) {
+                                unabort();
+                                set_iters(video_target());
+                                set_up_local_computation();
+                                print_check();
                             } else {
-                                ev.type = EV_SET_COMPUTE;
-                                queue_push(ev);
+                                set_up_local_computation();
+                                print_check();
                             }
                         } else {
                             info("computation done");
@@ -214,7 +257,7 @@ void process_pipe_message(event* const ev)
             info("message OK received");
             break;
         case MSG_VERSION:
-            fprintf(stderr, "INFO: Module version %d.%d-p%d\n", msg->data.version.major, msg->data.version.minor, msg->data.version.patch);
+            display_module_ver(msg->data.version.major, msg->data.version.minor, msg->data.version.patch);
             break;
         case MSG_COMPUTE_DATA:
             update_data(&(msg->data.compute_data));

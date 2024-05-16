@@ -1,3 +1,11 @@
+/*
+ *
+ * Author1: Jan Faigl
+ * Author2: Matyas Godula
+ *
+ */
+
+
 #include "computation.h"
 #include "utils.h"
 #include "event_queue.h"
@@ -40,6 +48,7 @@ static struct {
     bool done;
     bool video;
     bool aborted;
+    bool set_up;
 
     bool video_request;
 
@@ -66,7 +75,8 @@ static struct {
     
     .computing = false,
     .done = false,
-    .aborted = false
+    .aborted = false,
+    .set_up = false
 };
 
 typedef struct {
@@ -183,6 +193,8 @@ void cancel_done() { comp.done = false; }
 
 bool is_video() { return comp.video; }
 
+void set_iters(int n) { comp.n = n; }
+
 void computation_init(void) 
 {
     comp.grid = my_alloc(comp.grid_w * comp.grid_h);
@@ -222,6 +234,8 @@ void unabort(void) { comp.aborted = false; }
 
 void cancel_computing(void) { comp.computing = false; }
 
+bool is_set_up(void) { return comp.set_up; }
+
 bool set_compute(message* msg)
 {
     bool ret = !is_computing();
@@ -234,6 +248,7 @@ bool set_compute(message* msg)
         msg->data.set_compute.d_im = comp.d_im;
         msg->data.set_compute.n = comp.n;
         comp.done = false;
+        comp.set_up = true;
     }
     return ret;
 }
@@ -484,6 +499,8 @@ bool compute_local()
     queue_push(ev);
     return is_computing();
 }
+
+bool is_local_set(void) { return local_computation.set_up; }
 
 // --------------------------------------------------------------------- image_interactions -------------------------------------
 

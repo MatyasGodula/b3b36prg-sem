@@ -22,5 +22,8 @@ void info(const char *str);
 void debug(const char *str);
 void error(const char *str);
 void warning(const char* str);
+void display_module_ver(int major, int minor, int patch);
+
+void print_help(void);
 
 #endif

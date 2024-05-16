@@ -20,6 +20,8 @@ bool change_iters(int target);
 void zero_iters();
 void cancel_done();
 int video_target();
+void set_iters(int n);
+bool is_set_up(void);
 
 bool is_video();
 
@@ -48,6 +50,7 @@ void compute_chunk_local();
 void update_data_local();
 bool compute_local();
 void set_up_local_computation();
+bool is_local_set(void);
 
 // --------------------------------------------------------------------- image_interactions -------------------------------------
 
