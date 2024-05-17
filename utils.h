@@ -23,6 +23,8 @@ void debug(const char *str);
 void error(const char *str);
 void warning(const char* str);
 void display_module_ver(int major, int minor, int patch);
+void pipe_message_report(int msg_name);
+void report_read_error(char* str);
 
 void print_help(void);
 

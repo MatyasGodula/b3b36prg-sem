@@ -123,10 +123,11 @@ bool read_input_file()
     while (((c = fgetc(file)) != EOF) && idx < NUMBER_OF_PARAMETERS) {
         if (c == '[') {
             switch(array[idx].type) {
-                case DOUBLE:
+                // reads the input parameters file using pointers
+                case DOUBLE: 
                     ret_db = fscanf(file, "%lf", &value_db);
-                    if (ret_db != 1) {
-                        fprintf(stderr, "cannot read from file value: %s\n", array[idx].name);
+                    if (ret_db != 1) { // scanf was not successful
+                        report_read_error(array[idx].name);
                         fclose(file);
                         return false;
                     } else {
@@ -136,13 +137,13 @@ bool read_input_file()
                     break;
                 case INTEGER:
                     ret_ui = fscanf(file, "%d", &value_int);
-                    if (ret_ui != 1 || value_int < 0) {
-                        fprintf(stderr, "cannot read from file value: %s\n", array[idx].name);
+                    if (ret_ui != 1 || value_int < 0) { // faulty integer input 
+                        report_read_error(array[idx].name);
                         fclose(file);
                         return false;
                     } else {
                         if (value_int > 255) {
-                            fprintf(stderr, "the number of iterations inputted is larger than 255, the images are going to look strange");
+                            warning("the number of iterations inputted is larger than 255, the images are going to look strange");
                         }
                         *(int *)(array[idx].pointer) = value_int;
                     }
@@ -151,7 +152,7 @@ bool read_input_file()
                 case BOOL:
                     ch = fgetc(file);
                     if (ch != 'Y' && ch != 'n') {
-                        fprintf(stderr, "cannot read from file value: %s\n", array[idx].name);
+                        report_read_error(array[idx].name);
                         fclose(file);
                         return false;
                     } else {
@@ -163,13 +164,18 @@ bool read_input_file()
                     }
                 default:
                     break;
-            }
+            } // end of switch
         }
-    }
+    } // end of if
     fclose(file);
     return true;
 }
 
+/*
+ * 
+ * this function ^^^^ was inspired by Jonas Fischer
+ * 
+ */
 
 void set_video() {
     comp.video_target = comp.n;
@@ -178,11 +184,12 @@ void set_video() {
 
 bool change_iters(int target) 
 {
-    comp.n += 1;
-    if (comp.n > target) {
+    if (comp.n >= target) {
         return false;
-    } 
-    return true;
+    } else {
+        comp.n += 1;
+        return true;
+    }
 }
 
 int video_target() { return comp.video_target; }

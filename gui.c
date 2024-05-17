@@ -5,8 +5,6 @@
  *
  */
 
-
-
 #include <SDL.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -140,7 +138,6 @@ void* gui_win_thread(void* d)
                 }
 
             } else if (sdl_event.type == SDL_KEYUP) {
-                    info("keyup");
             } else {
                 //debug("SDL_PollEvent initialized");
             }

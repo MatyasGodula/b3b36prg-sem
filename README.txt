@@ -18,15 +18,16 @@ if you can and the image should recenter;
 
 Controls
     s ....... sets up the computation, you will need to press before initializing any computation because of the ability to read parameters while running
-    c ....... starts computing in comp_module and slowly updating the image (can be aborted by a)
-    a ....... aborts the computation on the comp_module
-    1 ....... calculates the fractal locally in the control app (the computation is os fast pressing a would not make a difference)
+    1 ....... starts computing in comp_module and slowly updating the image (can be aborted by a)
+    a ....... aborts the computation on the comp_module, can also abort the animation
+    c ....... calculates the fractal locally in the control app (the computation is os fast pressing a would not make a difference)
     e ....... deletes the whole image currently shown
     p ....... saves the image into a png called "output.png"
     v ....... plays an animation when selected in input_parameters, keep in mind that when animations are enabled movement within the image is not possible
     r ....... in case you change parameters while the program is running this keybind will read the file again and update the values
     h ....... shows these controls within the terminal (help)
     g ....... requests and prints the current comp_module version
+    l ....... cancels the current computation and resets the cid
     = ....... supposed to be + but made for US keyboard layouts, zooms in the image
     - ....... zooms out the image
     arrow left, arrow right, arrow up, arrow down ... movement within the image you will need to be in the gui window
@@ -35,4 +36,6 @@ Controls
 Before running the program you will need to create the pipes which the programs use to communicate between each other, using the create_pipes.sh script
 the program is given in a cleaned non-compiled state, both prgsem and comp_module have their own separate makefiles.
 The reference main app works with the custom comp_module, and vice versa. 
+
+There are citation in the parts of the code inspired by prof. Faigl's tutorials
      

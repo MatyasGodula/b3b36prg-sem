@@ -1,3 +1,9 @@
+/*
+ *
+ * Author: Jan Faigl
+ *
+ */
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <pthread.h>

@@ -31,6 +31,7 @@
 #define BOLD_BLUE      "\033[1;34m"
 #define BOLD_MAGENTA   "\033[1;35m"
 #define BOLD_CYAN      "\033[1;36m"
+// these lines above were written by chatgpt
 
 void my_assert(bool r, const char *func_name, int line, const char *file_name)
 {
@@ -66,33 +67,44 @@ void call_termios(int reset)
 
 void info(const char *str) 
 {
-    fprintf(stderr, BRIGHT_GREEN "INFO: %s\n" RESET, str);
+    fprintf(stderr, BRIGHT_GREEN "INFO: " RESET);
+    fprintf(stderr, "%s\n", str);
 }
 
 void debug(const char *str)
 {
-    fprintf(stdout, "DEBUG: %s\n", str);
+    fprintf(stderr, "DEBUG: ");
+    fprintf(stderr, "%s\n", str);
 }
 
 void error(const char *str)
 {
-    fprintf(stderr, BRIGHT_RED "ERROR: %s\n" RESET, str);
+    fprintf(stderr, BRIGHT_RED "ERROR: " RESET);
+    fprintf(stderr, "%s\n", str);
 }
 
 void warning(const char* str) 
 {
-    fprintf(stderr, RED "WARNING: %s\n" RESET, str);
+    fprintf(stderr, RED "WARNING: " RESET);
+    fprintf(stderr, "%s\n", str);
 }
 
 void display_module_ver(int major, int minor, int patch) 
 {
-    fprintf(stderr, BRIGHT_BLUE "MODULE VERSION: %d.%d-p%d\n" RESET, major, minor, patch);
+    fprintf(stderr, BRIGHT_BLUE "MODULE VERSION: " RESET);
+    fprintf(stderr, "%d.%d-p%d\n", major, minor, patch);
+}
+
+void report_read_error(char* str)
+{
+    printf(BRIGHT_RED "ERROR: " RESET);
+    printf("Faulty input in input_parameters at position %s, quitting the program\n", str);
 }
 
 // just for the case of readability
 void pipe_message_report(int msg_name)
 {
-    printf("ERROR: unhandled message type ");
+    printf(BRIGHT_RED "ERROR: unhandled message type ");
     switch(msg_name) {
         case MSG_OK:
             printf("MSG_OK\n");
@@ -128,6 +140,7 @@ void pipe_message_report(int msg_name)
             printf("otherwise unknown message\n");
             break;
     }
+    printf(RESET);
 }
 
 void print_help()

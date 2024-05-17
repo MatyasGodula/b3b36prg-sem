@@ -19,6 +19,8 @@
 #include "gui.h"
 #include "xwin_sdl.h"
 
+#define MOVEMENT_CONSTANT 0.2
+
 static void process_pipe_message(event* const ev);
 
 /*
@@ -42,8 +44,6 @@ void* main_thread(void* data)
     if (!success) {
         set_quit();
     }
-    //print_check();
-    // initialize computation & visualization
     do {
         event ev = queue_pop();
         event ev1; // if i need to add more events
@@ -64,22 +64,25 @@ void* main_thread(void* data)
                 }
                 ev.type = EV_SET_COMPUTE;
                 queue_push(ev);
+                info("Input file read");
             case EV_SET_COMPUTE:
                 info(set_compute(&msg) ? "set_compute success" : "set_compute fail");
                 set_up_local_computation();
                 break;
             case EV_VIDEO:
-                if (!is_computing() || (is_computing() && is_aborted())) {
-                    if (is_video()) {
-                        unabort();
-                        set_video();
-                        printf("EV_VIDEO print check:\n");
-                        print_check();
-                        ev1.type = EV_COMPUTE_CPU;
-                        queue_push(ev1);
+                if (is_local_set()) {
+                    if (!is_computing() || (is_computing() && is_aborted())) {
+                        if (is_video()) {
+                            unabort();
+                            set_video();
+                            ev1.type = EV_COMPUTE_CPU;
+                            queue_push(ev1);
+                        }
+                    } else {
+                        warning("Please wait for the computation to finish, or press a to first abort");
                     }
                 } else {
-                    warning("Please wait for the computation to finish, or press a to first abort");
+                    warning("Please first set up the computation using s");
                 }
                 break;
             case EV_COMPUTE_KB:
@@ -99,22 +102,24 @@ void* main_thread(void* data)
                 break;
             case EV_RESET_CHUNK:
                 cancel_computing();
+                info("Chunk reset, press c or 1 to compute");
                 break;
             case EV_ABORT:
                 abort_comp();
-                //printf("abort sent to the comp_module\n");
+                info("Abort sent to comp_module");
                 msg.type = MSG_ABORT;
-                //abort_comp();
                 break;
             case EV_PIPE_IN_MESSAGE:
                 process_pipe_message(&ev);
                 break;
             case EV_SAVE_IMAGE:
                 save_surface_to_image("output.png");
+                info("Image saved, the file is named output.png");
                 break;
             case EV_ERASE_IMAGE:
                 clean_image();
                 gui_refresh();
+                info("Image erased");
                 break;
             case EV_REFRESH:
                 gui_refresh();
@@ -130,6 +135,8 @@ void* main_thread(void* data)
                         ev1.type = EV_COMPUTE_CPU;
                         queue_push(ev);
                         queue_push(ev1);
+                    } else {
+                        warning("Can not zoom while video is chosen, change input parameters and pres r");
                     }
                 }
                 break;
@@ -141,55 +148,65 @@ void* main_thread(void* data)
                         ev1.type = EV_COMPUTE_CPU;
                         queue_push(ev);
                         queue_push(ev1);
+                    } else {
+                        warning("Can not zoom while video is chosen, change input parameters and pres r");
                     }
                 }
                 break;
             case EV_MOVE_LEFT:
                 if (!is_computing()) {
                     if (!is_video()) {
-                        move_left(0.2);
+                        move_left(MOVEMENT_CONSTANT);
                         ev.type = EV_SET_COMPUTE;
                         ev1.type = EV_COMPUTE_CPU;
                         queue_push(ev);
                         queue_push(ev1);
+                    } else {
+                        warning("Can not move while video is chosen, change input parameters and pres r");
                     }
                 }
                 break;
             case EV_MOVE_RIGHT:
                 if (!is_computing()) {
                     if (!is_video()) {
-                        move_right(0.2);
+                        move_right(MOVEMENT_CONSTANT);
                         ev.type = EV_SET_COMPUTE;
                         ev1.type = EV_COMPUTE_CPU;
                         queue_push(ev);
                         queue_push(ev1);
+                    } else {
+                        warning("Can not move while video is chosen, change input parameters and pres r");
                     }
                 }
                 break;
             case EV_MOVE_UP:
                 if (!is_computing()) {
                     if (!is_video()) {
-                        move_up(0.2);
+                        move_up(MOVEMENT_CONSTANT);
                         ev.type = EV_SET_COMPUTE;
                         ev1.type = EV_COMPUTE_CPU;
                         queue_push(ev);
                         queue_push(ev1);
+                    } else {
+                        warning("Can not move while video is chosen, change input parameters and pres r");
                     }
-                }
+                } 
                 break;
             case EV_MOVE_DOWN:
                 if (!is_computing()) {
                     if (!is_video()) {
-                        move_down(0.2);
+                        move_down(MOVEMENT_CONSTANT);
                         ev.type = EV_SET_COMPUTE;
                         ev1.type = EV_COMPUTE_CPU;
                         queue_push(ev);
                         queue_push(ev1);
+                    } else {
+                        warning("Can not move while video is chosen, change input parameters and pres r");
                     }
                 }
                 break;
             case EV_COMPUTE_CPU_KB:
-                if (is_local_set()) {
+                if (is_local_set()) { // prevents start without set_up
                     if (!is_computing() || is_aborted()) {
                         ev.type = EV_COMPUTE_CPU;
                         queue_push(ev);
@@ -202,22 +219,25 @@ void* main_thread(void* data)
                 if (!quit) {
                     if (is_done()) {
                         gui_refresh();
-                        if (is_video()) {
+                        if (is_video()) { // if video was activated the animation cycles through the iterations
                             if (change_iters(video_target()) && !is_aborted()) {
                                 cancel_done();
                                 set_up_local_computation();
                                 compute_local();
-                            } else if (is_aborted()) {
+                            } else if (is_aborted()) { // detects the abort 
                                 unabort();
-                                set_iters(video_target());
-                                set_up_local_computation();
-                                print_check();
-                            } else {
-                                set_up_local_computation();
-                                print_check();
+                                if (video_target() != 0) { // makes sure the iterations were set up in the first place
+                                    set_iters(video_target()); // sets the iterations to the previous target for the animation
+                                }
+                                ev.type = EV_SET_COMPUTE;
+                                queue_push(ev);
+                            } 
+                            else {
+                                ev.type = EV_SET_COMPUTE;
+                                queue_push(ev);
                             }
                         } else {
-                            info("computation done");
+                            info("Computation done");
                             ev.type = EV_SET_COMPUTE;
                             queue_push(ev);
                         }
@@ -234,7 +254,7 @@ void* main_thread(void* data)
             // writes information back into the pipe_out
             if (write(pipe_out, msg_buffer, msg_len) == msg_len) {
             } else {
-                error("send message failed");
+                error("Send message failed");
             }
         }
         quit = is_quit();
@@ -254,7 +274,7 @@ void process_pipe_message(event* const ev)
     const message* msg =  ev->data.msg;
     switch (msg->type) {
         case MSG_OK:
-            info("message OK received");
+            info("Message OK received");
             break;
         case MSG_VERSION:
             display_module_ver(msg->data.version.major, msg->data.version.minor, msg->data.version.patch);
@@ -263,24 +283,20 @@ void process_pipe_message(event* const ev)
             update_data(&(msg->data.compute_data));
             break;
         case MSG_DONE:
-            printf("msg done received\n");
             gui_refresh();
-            if (is_done()) {
-                //gui_refresh();
-                //info("Computation done");
+            if (is_done()) { // sets up the next computation 
                 event ev1 = { .type = EV_SET_COMPUTE };
                 queue_push(ev1);
-            } else if (is_computing()) {
-                printf("compute pushed into the queue\n");
+            } else if (is_computing()) { // if not finished pushes a new computation
                 event ev = { .type = EV_COMPUTE };
                 queue_push(ev);
             } else {}
             break;
         case MSG_ABORT:
-            info("computation successfully aborted by the comp_module");
+            info("Computation successfully aborted by the comp_module");
             break;
         default:
-            fprintf(stderr, "Unhandled pipe message type %d\n", msg->type);
+            pipe_message_report(msg->type);
             break;
         
     } // end of switch (msg->type)
