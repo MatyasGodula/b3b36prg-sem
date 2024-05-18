@@ -309,7 +309,9 @@ void update_data(const msg_compute_data* compute_data)
             comp.computing = false;
         }
     } else {
-        warning("Received chunk with unexpected chunk id");
+        error("Received chunk with unexpected chunk id, quitting the computation");
+        event ev = { .type = EV_QUIT };
+        queue_push(ev);
     }
 }
 

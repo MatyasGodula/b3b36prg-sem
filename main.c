@@ -57,14 +57,19 @@ void* main_thread(void* data)
                 msg.type = MSG_GET_VERSION;
                 break;
             case EV_READ:
-                bool success = read_input_file();
-                if (!success) {
-                    set_quit();
-                    break;
+                if (!is_computing()) {
+                    bool success = read_input_file();
+                    if (!success) {
+                        set_quit();
+                        break;
+                    }
+                    ev.type = EV_SET_COMPUTE;
+                    queue_push(ev);
+                    info("Input file read"); 
+                } else {
+                    warning("Please first cancel the computation using l, or let it finish");
                 }
-                ev.type = EV_SET_COMPUTE;
-                queue_push(ev);
-                info("Input file read");
+                break;
             case EV_SET_COMPUTE:
                 info(set_compute(&msg) ? "set_compute success" : "set_compute fail");
                 set_up_local_computation();
@@ -77,9 +82,11 @@ void* main_thread(void* data)
                             set_video();
                             ev1.type = EV_COMPUTE_CPU;
                             queue_push(ev1);
+                        } else {
+                            warning("You have not chosen the video option, set it up in input_parameters and press r");
                         }
                     } else {
-                        warning("Please wait for the computation to finish, or press a to first abort");
+                        warning("Please wait for the computation to finish, or press a to abort first");
                     }
                 } else {
                     warning("Please first set up the computation using s");
@@ -138,6 +145,8 @@ void* main_thread(void* data)
                     } else {
                         warning("Can not zoom while video is chosen, change input parameters and pres r");
                     }
+                } else {
+                    warning("Please let the computation finish first before moving");
                 }
                 break;
             case EV_ZOOM_OUT:
@@ -151,6 +160,8 @@ void* main_thread(void* data)
                     } else {
                         warning("Can not zoom while video is chosen, change input parameters and pres r");
                     }
+                } else {
+                    warning("Please let the computation finish first before moving");
                 }
                 break;
             case EV_MOVE_LEFT:
@@ -164,6 +175,8 @@ void* main_thread(void* data)
                     } else {
                         warning("Can not move while video is chosen, change input parameters and pres r");
                     }
+                } else {
+                    warning("Please let the computation finish first before moving");
                 }
                 break;
             case EV_MOVE_RIGHT:
@@ -177,6 +190,8 @@ void* main_thread(void* data)
                     } else {
                         warning("Can not move while video is chosen, change input parameters and pres r");
                     }
+                } else {
+                    warning("Please let the computation finish first before moving");
                 }
                 break;
             case EV_MOVE_UP:
@@ -190,7 +205,9 @@ void* main_thread(void* data)
                     } else {
                         warning("Can not move while video is chosen, change input parameters and pres r");
                     }
-                } 
+                } else {
+                    warning("Please let the computation finish first before moving");
+                }
                 break;
             case EV_MOVE_DOWN:
                 if (!is_computing()) {
@@ -203,6 +220,8 @@ void* main_thread(void* data)
                     } else {
                         warning("Can not move while video is chosen, change input parameters and pres r");
                     }
+                } else {
+                    warning("Please let the computation finish first before moving");
                 }
                 break;
             case EV_COMPUTE_CPU_KB:

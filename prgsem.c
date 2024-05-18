@@ -108,10 +108,7 @@ void* read_pipe_thread(void* data)
 		} else { // error occurred
 			fprintf(stderr, "Error: problem reading from a file\n");
 			set_quit();
-			event ev = { .type = EV_QUIT }; // deactivated for now
-			/*
-			 * added queue_push to push the quit into the queue 
-			 */
+			event ev = { .type = EV_QUIT };
 			queue_push(ev);
 		}
 		end = is_quit();

@@ -77,59 +77,60 @@ void* gui_win_thread(void* d)
                 switch(sdl_event.key.keysym.sym) {
                         case SDLK_q:
                             ev.type = EV_QUIT;
-                            info("quit");
                             break;
                         case SDLK_s:
-                            info("s received");
                             ev.type = EV_SET_COMPUTE;
                             break;
-                        /*case SDLK_c:
-                            info("c received");
-                            ev.type = EV_COMPUTE;
-                            break;*/
+                        case SDLK_1:
+                            ev.type = EV_COMPUTE_KB;
+                            break;
+                        case SDLK_c:
+                            ev.type = EV_COMPUTE_CPU_KB;
+                            break;
                         case SDLK_a:
-                            info("a received");
                             ev.type = EV_ABORT;
                             break;
                         case SDLK_g:
-                            info("g received");
                             ev.type = EV_GET_VERSION;
                             break;
-// ------------------------ image control -------------------------
-                        case SDLK_LEFT:
-                            info("left arrow received");
-                            ev.type = EV_MOVE_LEFT;
+                        case SDLK_r:
+                            ev.type = EV_READ;
                             break;
-                        case SDLK_RIGHT:
-                            info("right arrow received");
-                            ev.type = EV_MOVE_RIGHT;
-                            break;
-                        case SDLK_UP:
-                            info("up arrow received");
-                            ev.type = EV_MOVE_UP;
-                            break;
-                        case SDLK_DOWN:
-                            info("down arrow received");
-                            ev.type = EV_MOVE_DOWN;
-                            break;
-                        case SDLK_EQUALS:
-                            info("+ received");
-                            ev.type = EV_ZOOM_IN;
-                            break;
-                        case SDLK_MINUS:
-                            info("- received");
-                            ev.type = EV_ZOOM_OUT;
-                            break;
-// ------------------------ image control -------------------------
+                        case SDLK_l:
+                            ev.type = EV_RESET_CHUNK;
+                            break; 
                         case SDLK_p:
                             ev.type = EV_SAVE_IMAGE;
                             break;
-                        case SDLK_l:
+                        case SDLK_e:
                             ev.type = EV_ERASE_IMAGE;
                             break;
                         case SDLK_v:
                             ev.type = EV_VIDEO;
                             break; 
+                        case SDLK_h:
+                            ev.type = EV_HELP;
+                            break;
+// ------------------------ image control -------------------------
+                        case SDLK_LEFT:
+                            ev.type = EV_MOVE_LEFT;
+                            break;
+                        case SDLK_RIGHT:
+                            ev.type = EV_MOVE_RIGHT;
+                            break;
+                        case SDLK_UP:
+                            ev.type = EV_MOVE_UP;
+                            break;
+                        case SDLK_DOWN:
+                            ev.type = EV_MOVE_DOWN;
+                            break;
+                        case SDLK_EQUALS:
+                            ev.type = EV_ZOOM_IN;
+                            break;
+                        case SDLK_MINUS:
+                            ev.type = EV_ZOOM_OUT;
+                            break;
+// ------------------------ image control -------------------------
                         default:
                             break;
                 } // end of switch
